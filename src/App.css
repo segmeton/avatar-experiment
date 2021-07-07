@@ -1,6 +1,5 @@
 body{
     background-color: snow;
-    
 }
 
 #root{
@@ -42,6 +41,16 @@ footer{
 .col-6{
     flex: 0 0 50%;
     max-width: 50%;
+}
+
+.img-responsive{
+    width: 100%;
+    height: auto;
+}
+.ukiyoe-responsive{
+    margin: auto;
+    max-width: 100%;
+    max-height: 400px;
 }
 /* .App {
   text-align: center;

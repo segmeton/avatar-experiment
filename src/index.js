@@ -17,23 +17,16 @@ class Doc extends React.Component {
 ReactDOM.render(
     <React.StrictMode>
         <Doc />
-        <header class="header">
-            <div class="header-container">
-                <h1 class="title">Experiment - { currentDate }</h1>
+        <header className="header">
+            <div className="header-container">
+                <h1 className="title">Experiment - { currentDate }</h1>
             </div>
         </header>
-        <main class="container">
-            <div class="row">
-                <div class="column col-6" style={{backgroundColor: "blue"}}>
-                    <img src="http://lorempixel.com/400/200/city/5" />
-                </div>
-                <div class="column col-6" style={{backgroundColor: "red"}}>
-                    <img src="http://lorempixel.com/400/200/city/6" />
-                </div>
-            </div>
+        <main className="container">
+            <ImageHandler />
         </main>
         <footer>
-            <div class="footer-container">
+            <div className="footer-container">
                 <span>Ritsumeikan University - Intelligent Computer Entertainment Lab</span>
             </div>
         </footer>
