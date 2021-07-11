@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import ImageHandler from './ImageHandler';
 import reportWebVitals from './reportWebVitals';
+import Live2DHandler from "./Live2DHandler";
 
 var currentDate = new Date().toLocaleDateString();
 
@@ -23,7 +24,7 @@ ReactDOM.render(
             </div>
         </header>
         <main className="container">
-            <ImageHandler />
+            <Live2DHandler />
         </main>
         <footer>
             <div className="footer-container">
