@@ -47,10 +47,15 @@ footer{
     width: 100%;
     height: auto;
 }
+
 .ukiyoe-responsive{
     margin: auto;
     max-width: 100%;
     max-height: 400px;
+}
+
+.ukiyoe-container{
+    min-height: 400px;
 }
 /* .App {
   text-align: center;

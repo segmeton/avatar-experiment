@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import thank_you_f from "./audio/thank_you_f.mp3";
+
 class ImageHandler extends React.Component {
 
 
@@ -28,9 +30,9 @@ class ImageHandler extends React.Component {
         // this.audio.addEventListener('ended', () => this.setState({ play: false }));
     }
 
-    componentWillUnmount() {
+    // componentWillUnmount() {
         // this.audio.removeEventListener('ended', () => this.setState({ play: false }));  
-    }
+    // }
 
     // togglePlay = () => {
     //     this.setState({ play: !this.state.play }, () => {
@@ -66,18 +68,45 @@ class ImageHandler extends React.Component {
 
     getUkiyoeName = () => this.state.ukiyoeName
 
-    handleSubmit(event) {
+    handleSubmit = (event) => {
         // alert('A name was submitted: ' + this.state.value);
         event.preventDefault();
         this.updateImages();
 
-        this.url = "./audio/thank_you.mp3";
-        // this.audio = new Audio(this.url);
-        this.audio = new Audio(require("./audio/thank_you_f.mp3").default);
-        this.audio.crossOrigin = 'anonymous';
-        // audio = new Audio(this.props.url)
+        if(this.audio != null)
+        {
+            if(this.audio.currentTime == 0 || this.audio.currentTime == this.audio.duration)
+            {
+                this.url = "./audio/thank_you.mp3";
+                // this.audio = new Audio(this.url);
+                // this.audio = new Audio(require("./audio/thank_you_f.mp3").default);
+                // this.audio.crossOrigin = 'anonymous';
+                // audio = new Audio(this.props.url)
+        
+                // this.audio.play();
 
-        this.audio.play();
+                this.audioHandler("./audio/thank_you.mp3");
+            }   
+        }
+        else
+        {
+            this.url = "./audio/thank_you.mp3";
+                // this.audio = new Audio(this.url);
+                // this.audio = new Audio(require("./audio/thank_you_f.mp3").default);
+                this.audio = new Audio(thank_you_f);
+                this.audio.crossOrigin = 'anonymous';
+                // audio = new Audio(this.props.url)
+        
+                this.audio.play();
+        }
+        // this.url = "./audio/thank_you.mp3";
+        // // this.audio = new Audio(this.url);
+        // this.audio = new Audio(require("./audio/thank_you_f.mp3").default);
+        // this.audio.crossOrigin = 'anonymous';
+        // // audio = new Audio(this.props.url)
+
+        // this.audio.play();
+
 
         // if(!this.state.play) {
         //     this.audio.play();
@@ -85,6 +114,14 @@ class ImageHandler extends React.Component {
         // }
         
         
+    }
+
+    audioHandler = (path) => {
+        this.audio = new Audio(require("./audio/thank_you_f.mp3").default);
+        this.audio.crossOrigin = 'anonymous';
+        // audio = new Audio(this.props.url)
+
+        this.audio.play();
     }
 
     render() {
@@ -97,7 +134,9 @@ class ImageHandler extends React.Component {
             <div className="row">
                 <div className="column col-6">
                     <div className="row">
-                        <img className="ukiyoe-responsive" src={ require(`./img/ukiyoe/${ukiyoeName}.jpg`).default } />
+                        <div className="ukiyoe-container">
+                            <img className="ukiyoe-responsive" src={ require(`./img/ukiyoe/${ukiyoeName}.jpg`).default } />
+                        </div>
                     </div>
                     <div className="row">
                         <form  onSubmit={this.handleSubmit}>
