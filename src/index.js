@@ -66,10 +66,24 @@ class MainWindow extends React.Component {
         this.startTimer()
     }
 
-    startTimer() {
+    startTimer = () => {
         if (this.timer === 0 && this.state.seconds > 0) {
             this.timer = setInterval(this.countDown, 1000);
         }
+    }
+
+    getStringTime = (time) => {
+        let minute = this.state.time.m === undefined ? "00" : this.state.time.m;
+        
+        if(time.s === undefined){
+            return `${minute}:00`;
+        }
+
+        if(time.s < 10){
+            return `${minute}:0${time.s}`;
+        }
+
+        return `${minute}:${time.s}`;
     }
 
     CurrentStagePage = () => {
@@ -92,12 +106,21 @@ class MainWindow extends React.Component {
             </React.StrictMode>)
         } else if (this.state.stage === gameStages[1]) { //DESCRIPTION STAGE
             this.startTimer()
+
+            // let minute = this.state.time.m === undefined ? "00" : this.state.time.m;
+
+            // let seconds = this.validateSeconds(this.state.s);
+  
+            // let stringTime = `${minute}:${second}`
+
+            let stringTime = this.getStringTime(this.state.time);
+
             return (
                 <React.StrictMode>
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Description session: {this.state.time.m}:{this.state.time.s}</h1>}
+                            {<h1 className="title">Description session: {stringTime}</h1>}
                         </div>
                     </header>
                     <main className="container">
