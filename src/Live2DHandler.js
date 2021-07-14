@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, MenuItem, Select, TextField, withStyles} from "@material-ui/core";
+import {Button, TextField, withStyles} from "@material-ui/core";
 import {lightBlue} from "@material-ui/core/colors";
 
 const ColorButton = withStyles(() => ({
@@ -21,7 +21,7 @@ const SkipButton = withStyles(() => ({
     },
 }))(Button);
 
-const ColorInput = withStyles(() => ({
+export const ColorInput = withStyles(() => ({
     root: {
         display: "block",
         margin: "10px",
@@ -54,12 +54,26 @@ class Live2DHandler extends React.Component {
         this.state = {
             ukiyoeName: 1,
             play: false,
-            selectedEmotion: "normal"
+            selectedEmotion: "normal",
+            isSubmitButtonDisabled: true,
+            receivedDescription: ""
         }
 
         this.ticks = 1000;
 
         this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    componentDidMount() {
+        window.InitLive2DModel()
+
+        window.onbeforeunload = function () {
+            return true;
+        };
+    }
+
+    componentWillUnmount() {
+        window.onbeforeunload = null;
     }
 
     updateImages = () => {
@@ -77,10 +91,34 @@ class Live2DHandler extends React.Component {
         window.ChangeExpression(event.target.value);
     };
 
+    handleDescriptionInput = (event) => {
+        let receivedDescription = event.target.value
+
+        this.setState(() => ({
+            isSubmitButtonDisabled: (!(receivedDescription.toString().length > 0)),
+            receivedDescription: receivedDescription
+        }));
+    }
+
     getUkiyoeName = () => this.state.ukiyoeName
     emotionsSelector;
 
-    handleSubmit() {
+    handleSkip() {
+        //TODO
+        this.updateImages();
+
+        window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+    }
+
+    handleSubmit = () => {
+        //TODO: add to database
+        console.log("Submitted description: " + this.state.receivedDescription);
+
+        this.setState(() => ({
+            isSubmitButtonDisabled: true,
+            receivedDescription: ""
+        }));
+
         this.updateImages();
 
         this.url = "./audio/thank_you.mp3";
@@ -92,13 +130,21 @@ class Live2DHandler extends React.Component {
         window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
     }
 
+    keyPress = (e) => {
+        if(e.keyCode === 13){
+            console.log('value', e.target.value);
+
+            this.handleSubmit()
+        }
+    }
+
     render() {
         const ukiyoeName = this.getUkiyoeName();
 
-        let emotionsSelector = [];
+        /*let emotionsSelector = [];
         for (let i = 0; i < listOfExpressions.length; i++) {
             emotionsSelector.push(<MenuItem key={i} value={listOfExpressions[i]}>{listOfExpressions[i]}</MenuItem>);
-        }
+        }*/
 
         return (
             <div className="row">
@@ -108,7 +154,7 @@ class Live2DHandler extends React.Component {
                              alt="ukiyoe art"/>
                     </div>
                     <div className="row">
-                        <Select
+                        {/*<Select
                             id="emotion-selector"
                             value={this.state.selectedEmotion}
                             onChange={this.handleEmotionSelector}
@@ -116,14 +162,18 @@ class Live2DHandler extends React.Component {
                             fullWidth
                         >
                             {emotionsSelector}
-                        </Select>
+                        </Select>*/}
                         <ColorInput
+                            onKeyDown={this.keyPress}
+                            value={this.state.receivedDescription}
                             color="red"
                             fullWidth
                             id="outlined-basic"
                             label="Your description"
-                            variant="outlined"/>
+                            variant="outlined"
+                            onChange={this.handleDescriptionInput}/>
                         <ColorButton
+                            disabled={this.state.isSubmitButtonDisabled}
                             variant="contained"
                             color="primary"
                             onClick={() => {
@@ -131,12 +181,11 @@ class Live2DHandler extends React.Component {
                             }}>
                             Submit description
                         </ColorButton>
-
                         <SkipButton
                             variant="outlined"
                             color="secondary"
                             onClick={() => {
-                                this.handleSubmit()
+                                this.handleSkip()
                             }}>
                             Skip
                         </SkipButton>
