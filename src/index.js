@@ -43,6 +43,13 @@ class MainWindow extends React.Component {
     }
 
     showEndingAlert = () => {
+
+        let bgm = document.getElementById("bgm");
+
+        if(bgm !== undefined){
+            bgm.pause();
+        }
+
         this.child.showAfterTimer()
 
         window.onbeforeunload = null;
@@ -106,12 +113,6 @@ class MainWindow extends React.Component {
             </React.StrictMode>)
         } else if (this.state.stage === gameStages[1]) { //DESCRIPTION STAGE
             this.startTimer()
-
-            // let minute = this.state.time.m === undefined ? "00" : this.state.time.m;
-
-            // let seconds = this.validateSeconds(this.state.s);
-  
-            // let stringTime = `${minute}:${second}`
 
             let stringTime = this.getStringTime(this.state.time);
 

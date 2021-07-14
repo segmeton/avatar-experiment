@@ -1,6 +1,7 @@
 import React from 'react';
 import {Button, TextField, withStyles} from "@material-ui/core";
 import {lightBlue} from "@material-ui/core/colors";
+import thank_you_f from "./audio/thank_you_f.mp3";
 
 const ColorButton = withStyles(() => ({
     root: {
@@ -44,7 +45,7 @@ let listOfExpressions = ["normal", "very_happy", "disappointed", "sad_1", "happy
 
 class Live2DHandler extends React.Component {
 
-    getInitialState() {
+    getInitialState = () => {
         return {loaded: false} //initially not loaded
     }
 
@@ -56,7 +57,8 @@ class Live2DHandler extends React.Component {
             play: false,
             selectedEmotion: "normal",
             isSubmitButtonDisabled: true,
-            receivedDescription: ""
+            receivedDescription: "",
+            session: "describing" // describing || voting
         }
 
         this.ticks = 1000;
@@ -64,7 +66,7 @@ class Live2DHandler extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
         window.InitLive2DModel()
 
         window.onbeforeunload = function () {
@@ -72,7 +74,7 @@ class Live2DHandler extends React.Component {
         };
     }
 
-    componentWillUnmount() {
+    componentWillUnmount = () => {
         window.onbeforeunload = null;
     }
 
@@ -83,13 +85,17 @@ class Live2DHandler extends React.Component {
     }
 
     handleEmotionSelector = (event) => {
+        this.updateEmotion(event.target.value)
+    };
+
+    updateEmotion = (value) => {
         this.setState(() => ({
-            selectedEmotion: event.target.value
+            selectedEmotion: value
         }));
 
-        console.log("Changing to: " + event.target.value)
-        window.ChangeExpression(event.target.value);
-    };
+        console.log("Changing to: " + value)
+        window.ChangeExpression(value);
+    }
 
     handleDescriptionInput = (event) => {
         let receivedDescription = event.target.value
@@ -103,11 +109,11 @@ class Live2DHandler extends React.Component {
     getUkiyoeName = () => this.state.ukiyoeName
     emotionsSelector;
 
-    handleSkip() {
+    handleSkip = () => {
         //TODO
         this.updateImages();
 
-        window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+        // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
     }
 
     handleSubmit = () => {
@@ -122,12 +128,31 @@ class Live2DHandler extends React.Component {
         this.updateImages();
 
         this.url = "./audio/thank_you.mp3";
-        this.audio = new Audio(require("./audio/thank_you_f.mp3").default);
+        this.audio = new Audio(thank_you_f);
         this.audio.crossOrigin = 'anonymous';
 
         this.audio.play();
 
-        window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+        // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+
+        this.updateExpressionState();
+    }
+
+    updateExpressionState = () => {
+        if(this.state.selectedEmotion == "normal") {
+             return this.updateEmotion("very_happy");
+        }
+
+        if(this.state.selectedEmotion == "very_happy") {
+            return this.updateEmotion("sad_2");
+        }
+
+        if(this.state.selectedEmotion == "sad_2") {
+            return this.updateEmotion("normal");
+        }
+        
+
+            
     }
 
     keyPress = (e) => {
@@ -166,7 +191,8 @@ class Live2DHandler extends React.Component {
                         <ColorInput
                             onKeyDown={this.keyPress}
                             value={this.state.receivedDescription}
-                            color="red"
+                            // color="red"
+                            color="secondary"
                             fullWidth
                             id="outlined-basic"
                             label="Your description"
@@ -189,6 +215,12 @@ class Live2DHandler extends React.Component {
                             }}>
                             Skip
                         </SkipButton>
+                    </div>
+                    <div class>
+                        <audio autoPlay loop id="bgm">
+                            <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                        </audio>
                     </div>
                 </div>
 
