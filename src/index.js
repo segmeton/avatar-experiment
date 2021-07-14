@@ -10,7 +10,8 @@ import EndingAlertDialog from "./components/EndingAlertDialog";
 const currentDate = new Date().toLocaleDateString();
 
 const gameStages = ["welcome", "description", "results"];
-const gameStagesDurations = {welcome: 0, description: 36, results: 0}
+// experiment time : description(5min=>5*60)
+const gameStagesDurations = {welcome: 0, description: 300, results: 0}
 let currentStateIndex = 0;
 
 class Doc extends React.Component {
@@ -96,7 +97,7 @@ class MainWindow extends React.Component {
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Description session: {this.state.time.s}</h1>}
+                            {<h1 className="title">Description session: {this.state.time.m}:{this.state.time.s}</h1>}
                         </div>
                     </header>
                     <main className="container">

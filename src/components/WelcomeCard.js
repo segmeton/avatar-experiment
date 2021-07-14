@@ -47,7 +47,8 @@ export default function WelcomeCard({onChildClick}) {
             </CardActionArea>
             <CardActions>
                 <ColorInput
-                    color="red"
+                    //color="red"
+                    color="secondary"
                     fullWidth
                     id="outlined-basic"
                     label="Your name"
