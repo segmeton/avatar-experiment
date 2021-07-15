@@ -1,5 +1,5 @@
 //https://stackoverflow.com/a/54144489/15394878
-export function secondsToTime(secs){
+export function secondsToTime(secs) {
     let hours = Math.floor(secs / (60 * 60));
 
     let divisor_for_minutes = secs % (60 * 60);

@@ -1,10 +1,7 @@
 import React, {Component} from 'react';
 import Dialog from '@material-ui/core/Dialog';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Slide from '@material-ui/core/Slide';
 import ThankYouCard from "./ThankYouCard";
-import {lightBlue} from "@material-ui/core/colors";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;

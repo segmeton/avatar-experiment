@@ -18,11 +18,13 @@ const useStyles = makeStyles({
 export default function WelcomeCard({onChildClick}) {
     const classes = useStyles();
     const [isButtonEnabled, setButtonEnabled] = useState(true);
+    const [participantName, setParticipantName] = useState("")
 
     function handleNameInput(event) {
         let receivedName = event.target.value
 
         setButtonEnabled(!(receivedName.toString().length > 0))
+        setParticipantName(receivedName)
     }
 
     return (
@@ -47,14 +49,14 @@ export default function WelcomeCard({onChildClick}) {
             </CardActionArea>
             <CardActions>
                 <ColorInput
-                    color="red"
                     fullWidth
                     id="outlined-basic"
                     label="Your name"
                     variant="outlined"
                     onChange={handleNameInput}
                 />
-                <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary" onClick={onChildClick} fullWidth>
+                <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
+                        onClick={() => onChildClick(participantName)} fullWidth>
                     Start
                 </Button>
             </CardActions>

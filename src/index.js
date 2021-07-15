@@ -6,12 +6,15 @@ import {countDown, secondsToTime} from "./utils/Counter";
 import WelcomeCard from "./components/WelcomeCard";
 import './App.css';
 import EndingAlertDialog from "./components/EndingAlertDialog";
+import {db} from "./database/firebase";
+import {v4 as uuidv4} from 'uuid';
 
 const currentDate = new Date().toLocaleDateString();
 
 const gameStages = ["welcome", "description", "results"];
-const gameStagesDurations = {welcome: 0, description: 36, results: 0}
+const gameStagesDurations = {welcome: 0, description: 10, results: 0}
 let currentStateIndex = 0;
+
 
 class Doc extends React.Component {
     componentDidMount() {
@@ -25,29 +28,66 @@ class Doc extends React.Component {
 
 class MainWindow extends React.Component {
 
-    componentDidMount() {
-        let timeLeftVar = secondsToTime(this.state.seconds);
-        this.setState({time: timeLeftVar});
-    }
-
     constructor(props) {
         super(props);
         this.state = {
-            stage: gameStages[0]
+            stage: gameStages[0],
+            participantName: "",
+            participantID: 0,
+            totalNumberOfDescriptions: 0,
+            totalNumberOfSkipped: 0
         };
 
         this.timer = 0;
         this.startTimer = this.startTimer.bind(this);
         this.countDown = countDown.bind(this);
+
+        this.changeState = this.changeState.bind(this);
+    }
+
+    componentDidMount() {
+        let timeLeftVar = secondsToTime(this.state.seconds);
+        this.setState({time: timeLeftVar});
+
+        db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
+            snapshot.forEach(function (data) {
+                console.log(data.val().description)
+            });
+        });
     }
 
     showEndingAlert = () => {
         this.child.showAfterTimer()
 
         window.onbeforeunload = null;
+
+        db.ref(`participants/${this.state.participantID}`)
+            .update({
+                totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
+                totalNumberOfSkipped: this.state.totalNumberOfSkipped,
+                finishedSuccessfully: true
+            })
+            .then(() => {
+                console.log("Updated information about current participant to DB")
+            });
     }
 
-    changeState = () => {
+    changeState = (participantName) => {
+        console.log("Name of a participant: " + participantName)
+
+        //https://www.npmjs.com/package/uuid
+        const uuid = uuidv4().toString();
+
+        db.ref(`participants/${uuid}`)
+            .set({
+                participantName,
+                participantID: uuid,
+                finishedSuccessfully: false
+            })
+            .then(() => {
+                console.log("Added new participant to DB")
+            });
+
         if (currentStateIndex === 3) {
             currentStateIndex = 0
         } else {
@@ -57,12 +97,26 @@ class MainWindow extends React.Component {
         this.setState({
             stage: gameStages[currentStateIndex],
             time: {},
-            seconds: gameStagesDurations[gameStages[currentStateIndex]]
+            seconds: gameStagesDurations[gameStages[currentStateIndex]],
+            participantName: participantName,
+            participantID: uuid
         });
 
         this.timer = 0
+    }
 
-        this.startTimer()
+    onSkipButtonClicked = () => {
+
+        console.log("Skip! clicked in child")
+        this.setState({
+            totalNumberOfSkipped: this.state.totalNumberOfSkipped + 1
+        })
+    }
+
+    onDescriptionSubmitted = () => {
+        this.setState({
+            totalNumberOfDescriptions: this.state.totalNumberOfDescriptions + 1
+        })
     }
 
     startTimer() {
@@ -81,7 +135,7 @@ class MainWindow extends React.Component {
                     </div>
                 </header>
                 <main className="container">
-                    <WelcomeCard onChildClick={this.changeState}/>
+                    <WelcomeCard onChildClick={this.changeState.bind(this)}/>
                 </main>
                 <footer>
                     <div className="footer-container">
@@ -100,7 +154,11 @@ class MainWindow extends React.Component {
                         </div>
                     </header>
                     <main className="container">
-                        <Live2DHandler/>
+                        <Live2DHandler
+                            participantID={this.state.participantID}
+                            onSkipButtonClicked={this.onSkipButtonClicked}
+                            onDescriptionSubmitted={this.onDescriptionSubmitted}
+                        />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
                     <footer>
@@ -125,7 +183,8 @@ class MainWindow extends React.Component {
 export default MainWindow
 
 ReactDOM.render(
-    <MainWindow/>,
+    <MainWindow/>
+    ,
     document.getElementById('root')
 );
 
