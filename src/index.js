@@ -8,13 +8,13 @@ import './App.css';
 import EndingAlertDialog from "./components/EndingAlertDialog";
 import {db} from "./database/firebase";
 import {v4 as uuidv4} from 'uuid';
+import ConsentCard from "./components/ConsentCard";
 
 const currentDate = new Date().toLocaleDateString();
 
-const gameStages = ["welcome", "description", "results"];
-const gameStagesDurations = {welcome: 0, description: 10, results: 0}
+const gameStages = ["consent", "welcome", "description", "results"];
+const gameStagesDurations = {consent: 0, welcome: 0, description: 70, results: 0}
 let currentStateIndex = 0;
-
 
 class Doc extends React.Component {
     componentDidMount() {
@@ -43,6 +43,7 @@ class MainWindow extends React.Component {
         this.countDown = countDown.bind(this);
 
         this.changeState = this.changeState.bind(this);
+        this.startDescriptionRound = this.startDescriptionRound.bind(this);
     }
 
     componentDidMount() {
@@ -72,7 +73,23 @@ class MainWindow extends React.Component {
             });
     }
 
-    changeState = (participantName) => {
+    changeState = () => {
+        if (currentStateIndex === 3) {
+            currentStateIndex = 0
+        } else {
+            currentStateIndex++
+        }
+
+        this.timer = 0
+
+        this.setState({
+            stage: gameStages[currentStateIndex],
+            time: {},
+            seconds: gameStagesDurations[gameStages[currentStateIndex]]
+        });
+    }
+
+    startDescriptionRound = (participantName) => {
         console.log("Name of a participant: " + participantName)
 
         //https://www.npmjs.com/package/uuid
@@ -88,21 +105,12 @@ class MainWindow extends React.Component {
                 console.log("Added new participant to DB")
             });
 
-        if (currentStateIndex === 3) {
-            currentStateIndex = 0
-        } else {
-            currentStateIndex++
-        }
-
         this.setState({
-            stage: gameStages[currentStateIndex],
-            time: {},
-            seconds: gameStagesDurations[gameStages[currentStateIndex]],
             participantName: participantName,
             participantID: uuid
         });
 
-        this.timer = 0
+        this.changeState()
     }
 
     onSkipButtonClicked = () => {
@@ -126,7 +134,24 @@ class MainWindow extends React.Component {
     }
 
     CurrentStagePage = () => {
-        if (this.state.stage === gameStages[0]) {  //WELCOME STAGE
+        if (this.state.stage === gameStages[0]) {
+            return (<React.StrictMode>
+                <Doc/>
+                <header className="header">
+                    <div className="header-container">
+                        <h1 className="title">Important</h1>
+                    </div>
+                </header>
+                <main className="container">
+                    <ConsentCard onChildClick={this.changeState.bind(this)}/>
+                </main>
+                <footer>
+                    <div className="footer-container">
+                        <span>Ritsumeikan University - Intelligent Computer Entertainment Lab</span>
+                    </div>
+                </footer>
+            </React.StrictMode>)
+        } else if (this.state.stage === gameStages[1]) {  //WELCOME STAGE
             return (<React.StrictMode>
                 <Doc/>
                 <header className="header">
@@ -135,7 +160,7 @@ class MainWindow extends React.Component {
                     </div>
                 </header>
                 <main className="container">
-                    <WelcomeCard onChildClick={this.changeState.bind(this)}/>
+                    <WelcomeCard onChildClick={this.startDescriptionRound.bind(this)}/>
                 </main>
                 <footer>
                     <div className="footer-container">
@@ -143,7 +168,7 @@ class MainWindow extends React.Component {
                     </div>
                 </footer>
             </React.StrictMode>)
-        } else if (this.state.stage === gameStages[1]) { //DESCRIPTION STAGE
+        } else if (this.state.stage === gameStages[2]) { //DESCRIPTION STAGE
             this.startTimer()
             return (
                 <React.StrictMode>
@@ -153,7 +178,8 @@ class MainWindow extends React.Component {
                             {<h1 className="title">Description session: {this.state.time.s}</h1>}
                         </div>
                     </header>
-                    <main className="container">
+                    {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
+                    <main className="container" >
                         <Live2DHandler
                             participantID={this.state.participantID}
                             onSkipButtonClicked={this.onSkipButtonClicked}

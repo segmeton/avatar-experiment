@@ -25,7 +25,7 @@ const SkipButton = withStyles(() => ({
 export const ColorInput = withStyles(() => ({
     root: {
         display: "block",
-        margin: "10px",
+        marginTop: "10px",
         '& label.Mui-focused': {
             color: 'lightblue',
         },

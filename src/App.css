@@ -5,8 +5,8 @@ body{
 #root{
     position: relative;
     min-height: 100vh;
-    display:flex; 
-    flex-direction:column; 
+    display:flex;
+    flex-direction:column;
 }
 
 header{
@@ -55,6 +55,17 @@ footer{
     display: block;
     margin-bottom: 20px;
     margin-top: 20px;
+}
+
+.icon-emoji {
+    position: relative;
+    top: 4px;
+    margin-right: 5px;
+}
+
+#for_canvas {
+    max-width: 70% !important;
+    height: 200px;
 }
 
 /* .App {
