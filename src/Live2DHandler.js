@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, MenuItem, Select, TextField, withStyles} from "@material-ui/core";
+import {Button, TextField, withStyles} from "@material-ui/core";
 import {lightBlue} from "@material-ui/core/colors";
 import thank_you_f from "./audio/thank_you_f.mp3";
 import Message from "./utils/Message";
@@ -114,7 +114,10 @@ class Live2DHandler extends React.Component {
         }));
 
         console.log("Changing to: " + value)
-        window.ChangeExpression(value);
+
+        if (this.props.selectedGroup === "group_emotions") {
+            window.ChangeExpression(value);
+        }
     }
 
     handleDescriptionInput = (event) => {

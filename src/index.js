@@ -40,6 +40,7 @@ class MainWindow extends React.Component {
             language: "English", // English || 日本語
             isAgreeToConsent: false,
             dbEnabled: true,
+            selectedGroup: "group_emotions"
         };
 
         this.timer = 0;
@@ -54,21 +55,21 @@ class MainWindow extends React.Component {
         let timeLeftVar = secondsToTime(this.state.seconds);
         this.setState({time: timeLeftVar});
 
-        if(this.state.dbEnabled){
+        if (this.state.dbEnabled) {
             db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
                 snapshot.forEach(function (data) {
                     console.log(data.val().description)
                 });
             });
         }
-        
+
     }
 
     showEndingAlert = () => {
 
         let bgm = document.getElementById("bgm");
 
-        if(bgm !== undefined){
+        if (bgm !== undefined) {
             bgm.pause();
         }
 
@@ -76,19 +77,18 @@ class MainWindow extends React.Component {
 
         window.onbeforeunload = null;
 
-        if(this.state.dbEnabled)
-        {
+        if (this.state.dbEnabled) {
             db.ref(`participants/${this.state.participantID}`)
-            .update({
-                totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
-                totalNumberOfSkipped: this.state.totalNumberOfSkipped,
-                finishedSuccessfully: true
-            })
-            .then(() => {
-                console.log("Updated information about current participant to DB")
-            });
+                .update({
+                    totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
+                    totalNumberOfSkipped: this.state.totalNumberOfSkipped,
+                    finishedSuccessfully: true
+                })
+                .then(() => {
+                    console.log("Updated information about current participant to DB")
+                });
         }
-     
+
     }
 
     consentAccept = (language) => {
@@ -116,32 +116,39 @@ class MainWindow extends React.Component {
         });
     }
 
+    onGroupSelected = (event) => {
+        this.setState({
+            selectedGroup: event.target.value
+        });
+
+        console.log("Selected group: " + event.target.value)
+    }
+
     startDescriptionRound = (participantName) => {
         console.log("Name of a participant: " + participantName)
 
         //https://www.npmjs.com/package/uuid
         const uuid = uuidv4().toString();
 
-        
-        if(this.state.dbEnabled){
+        if (this.state.dbEnabled) {
             db.ref(`participants/${uuid}`)
-            .set({
-                participantName,
-                participantID: uuid,
-                finishedSuccessfully: false,
-                language: this.state.language,
-                isAgreeToConsent: this.state.isAgreeToConsent
-            })
-            .then(() => {
-                console.log("Added new participant to DB")
-            });
+                .set({
+                    participantName,
+                    participantID: uuid,
+                    finishedSuccessfully: false,
+                    language: this.state.language,
+                    isAgreeToConsent: this.state.isAgreeToConsent
+                })
+                .then(() => {
+                    console.log("Added new participant to DB")
+                });
 
             this.setState({
                 participantName: participantName,
                 participantID: uuid
             });
         }
-        
+
         this.changeState()
     }
 
@@ -167,12 +174,12 @@ class MainWindow extends React.Component {
 
     getStringTime = (time) => {
         let minute = this.state.time.m === undefined ? "00" : this.state.time.m;
-        
-        if(time.s === undefined){
+
+        if (time.s === undefined) {
             return `${minute}:00`;
         }
 
-        if(time.s < 10){
+        if (time.s < 10) {
             return `${minute}:0${time.s}`;
         }
 
@@ -206,7 +213,9 @@ class MainWindow extends React.Component {
                     </div>
                 </header>
                 <main className="container">
-                    <WelcomeCard onChildClick={this.startDescriptionRound.bind(this)}/>
+                    <WelcomeCard
+                        onStartDescriptionRoundClick={this.startDescriptionRound.bind(this)}
+                        onGroupSelected={this.onGroupSelected.bind(this)}/>
                 </main>
                 <footer>
                     <div className="footer-container">
@@ -228,8 +237,9 @@ class MainWindow extends React.Component {
                         </div>
                     </header>
                     {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
-                    <main className="container" >
+                    <main className="container">
                         <Live2DHandler
+                            selectedGroup={this.state.selectedGroup}
                             participantID={this.state.participantID}
                             onSkipButtonClicked={this.onSkipButtonClicked}
                             onDescriptionSubmitted={this.onDescriptionSubmitted}
