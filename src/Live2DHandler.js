@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, TextField, withStyles} from "@material-ui/core";
 import {lightBlue} from "@material-ui/core/colors";
 import thank_you_f from "./audio/thank_you_f.mp3";
+import Message from "./utils/Message"
 
 const ColorButton = withStyles(() => ({
     root: {
@@ -41,7 +42,7 @@ export const ColorInput = withStyles(() => ({
 }))(TextField);
 
 //list of available expressions
-let listOfExpressions = ["normal", "very_happy", "disappointed", "sad_1", "happy", "surprised", "shy", "sad_2"]
+let listOfExpressions = ["normal", "very_happy", "disappointed", "sad_1", "happy", "surprised", "shy", "sad_2"];
 
 class Live2DHandler extends React.Component {
 
@@ -56,25 +57,41 @@ class Live2DHandler extends React.Component {
             ukiyoeName: 1,
             play: false,
             selectedEmotion: "normal",
+            selectedEmotionIndex: 1,
             isSubmitButtonDisabled: true,
             receivedDescription: "",
             session: "describing" // describing || voting
         }
 
-        this.ticks = 1000;
+        this.timer = 40000; // in ms
+
+        this.msgObj = new Message(this.timer);
+
+        this.usedExpression = ["sad_1", "normal", "very_happy"];
 
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     componentDidMount = () => {
-        window.InitLive2DModel()
+        window.InitLive2DModel();
+
+        this.msgObj.CountDown(this.CountDownCallback);
 
         window.onbeforeunload = function () {
             return true;
         };
     }
 
+    CountDownCallback = () => {
+        this.updateExpressionState(false);
+        if(this.state.selectedEmotionIndex > 0){
+            this.msgObj.CountDown(this.CountDownCallback);
+        }
+        console.log(this.usedExpression[this.state.selectedEmotionIndex]);
+    }
+
     componentWillUnmount = () => {
+        this.msgObj.ClearCountDown();
         window.onbeforeunload = null;
     }
 
@@ -133,24 +150,44 @@ class Live2DHandler extends React.Component {
 
         // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
 
-        this.updateExpressionState();
+        this.updateExpressionState(true);
+
+        this.msgObj.CountDown(this.CountDownCallback);
     }
 
-    updateExpressionState = () => {
-        if(this.state.selectedEmotion == "normal") {
-             return this.updateEmotion("very_happy");
+    updateExpressionState = (isUp) => {
+        if(isUp){
+            let newIndex = this.state.selectedEmotionIndex + 1;
+            if(newIndex <= this.usedExpression.length - 1){
+                return this.updateSelectedEmotion(newIndex);
+            }
+            return null;
         }
 
-        if(this.state.selectedEmotion == "very_happy") {
-            return this.updateEmotion("sad_2");
+        let newIndex = this.state.selectedEmotionIndex - 1;
+        if(newIndex >= 0){
+            return this.updateSelectedEmotion(newIndex);
         }
+        return null;
 
-        if(this.state.selectedEmotion == "sad_2") {
-            return this.updateEmotion("normal");
-        }
-        
+        // if(this.state.selectedEmotion == "normal") {
+        //      return this.updateEmotion("very_happy");
+        // }
 
-            
+        // if(this.state.selectedEmotion == "very_happy") {
+        //     return this.updateEmotion("sad_2");
+        // }
+
+        // if(this.state.selectedEmotion == "sad_2") {
+        //     return this.updateEmotion("normal");
+        // }         
+    }
+
+    updateSelectedEmotion = (newIndex) => {
+        this.updateEmotion(this.usedExpression[newIndex]);
+        this.setState(() => ({
+            selectedEmotionIndex: newIndex
+        }));
     }
 
     playSound = () => {
