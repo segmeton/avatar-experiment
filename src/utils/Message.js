@@ -1,4 +1,4 @@
-export default class Message {
+export class Message {
     constructor(duration){
         this.duration = duration;
         this.isActive = false;
@@ -26,3 +26,5 @@ export default class Message {
         this.timer = null;
     }
 }
+
+export default Message;
