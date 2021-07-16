@@ -6,12 +6,15 @@ import {countDown, secondsToTime} from "./utils/Counter";
 import WelcomeCard from "./components/WelcomeCard";
 import './App.css';
 import EndingAlertDialog from "./components/EndingAlertDialog";
+import {db} from "./database/firebase";
+import {v4 as uuidv4} from 'uuid';
+import ConsentCard from "./components/ConsentCard";
 
 const currentDate = new Date().toLocaleDateString();
 
-const gameStages = ["welcome", "description", "results"];
 // experiment time : description(5min=>5*60)
-const gameStagesDurations = {welcome: 0, description: 300, results: 0}
+const gameStages = ["consent", "welcome", "description", "results"];
+const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0}
 let currentStateIndex = 0;
 
 class Doc extends React.Component {
@@ -26,20 +29,33 @@ class Doc extends React.Component {
 
 class MainWindow extends React.Component {
 
-    componentDidMount() {
-        let timeLeftVar = secondsToTime(this.state.seconds);
-        this.setState({time: timeLeftVar});
-    }
-
     constructor(props) {
         super(props);
         this.state = {
-            stage: gameStages[0]
+            stage: gameStages[0],
+            participantName: "",
+            participantID: 0,
+            totalNumberOfDescriptions: 0,
+            totalNumberOfSkipped: 0
         };
 
         this.timer = 0;
         this.startTimer = this.startTimer.bind(this);
         this.countDown = countDown.bind(this);
+
+        this.changeState = this.changeState.bind(this);
+        this.startDescriptionRound = this.startDescriptionRound.bind(this);
+    }
+
+    componentDidMount() {
+        let timeLeftVar = secondsToTime(this.state.seconds);
+        this.setState({time: timeLeftVar});
+
+        db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
+            snapshot.forEach(function (data) {
+                console.log(data.val().description)
+            });
+        });
     }
 
     showEndingAlert = () => {
@@ -53,6 +69,16 @@ class MainWindow extends React.Component {
         this.child.showAfterTimer()
 
         window.onbeforeunload = null;
+
+        db.ref(`participants/${this.state.participantID}`)
+            .update({
+                totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
+                totalNumberOfSkipped: this.state.totalNumberOfSkipped,
+                finishedSuccessfully: true
+            })
+            .then(() => {
+                console.log("Updated information about current participant to DB")
+            });
     }
 
     changeState = () => {
@@ -62,15 +88,51 @@ class MainWindow extends React.Component {
             currentStateIndex++
         }
 
+        this.timer = 0
+
         this.setState({
             stage: gameStages[currentStateIndex],
             time: {},
             seconds: gameStagesDurations[gameStages[currentStateIndex]]
         });
+    }
 
-        this.timer = 0
+    startDescriptionRound = (participantName) => {
+        console.log("Name of a participant: " + participantName)
 
-        this.startTimer()
+        //https://www.npmjs.com/package/uuid
+        const uuid = uuidv4().toString();
+
+        db.ref(`participants/${uuid}`)
+            .set({
+                participantName,
+                participantID: uuid,
+                finishedSuccessfully: false
+            })
+            .then(() => {
+                console.log("Added new participant to DB")
+            });
+
+        this.setState({
+            participantName: participantName,
+            participantID: uuid
+        });
+
+        this.changeState()
+    }
+
+    onSkipButtonClicked = () => {
+
+        console.log("Skip! clicked in child")
+        this.setState({
+            totalNumberOfSkipped: this.state.totalNumberOfSkipped + 1
+        })
+    }
+
+    onDescriptionSubmitted = () => {
+        this.setState({
+            totalNumberOfDescriptions: this.state.totalNumberOfDescriptions + 1
+        })
     }
 
     startTimer = () => {
@@ -94,7 +156,24 @@ class MainWindow extends React.Component {
     }
 
     CurrentStagePage = () => {
-        if (this.state.stage === gameStages[0]) {  //WELCOME STAGE
+        if (this.state.stage === gameStages[0]) {
+            return (<React.StrictMode>
+                <Doc/>
+                <header className="header">
+                    <div className="header-container">
+                        <h1 className="title">Important</h1>
+                    </div>
+                </header>
+                <main className="container">
+                    <ConsentCard onChildClick={this.changeState.bind(this)}/>
+                </main>
+                <footer>
+                    <div className="footer-container">
+                        <span>Ritsumeikan University - Intelligent Computer Entertainment Lab</span>
+                    </div>
+                </footer>
+            </React.StrictMode>)
+        } else if (this.state.stage === gameStages[1]) {  //WELCOME STAGE
             return (<React.StrictMode>
                 <Doc/>
                 <header className="header">
@@ -103,7 +182,7 @@ class MainWindow extends React.Component {
                     </div>
                 </header>
                 <main className="container">
-                    <WelcomeCard onChildClick={this.changeState}/>
+                    <WelcomeCard onChildClick={this.startDescriptionRound.bind(this)}/>
                 </main>
                 <footer>
                     <div className="footer-container">
@@ -111,7 +190,7 @@ class MainWindow extends React.Component {
                     </div>
                 </footer>
             </React.StrictMode>)
-        } else if (this.state.stage === gameStages[1]) { //DESCRIPTION STAGE
+        } else if (this.state.stage === gameStages[2]) { //DESCRIPTION STAGE
             this.startTimer()
 
             let stringTime = this.getStringTime(this.state.time);
@@ -124,8 +203,13 @@ class MainWindow extends React.Component {
                             {<h1 className="title">Description session: {stringTime}</h1>}
                         </div>
                     </header>
-                    <main className="container">
-                        <Live2DHandler/>
+                    {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
+                    <main className="container" >
+                        <Live2DHandler
+                            participantID={this.state.participantID}
+                            onSkipButtonClicked={this.onSkipButtonClicked}
+                            onDescriptionSubmitted={this.onDescriptionSubmitted}
+                        />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
                     <footer>
@@ -150,7 +234,8 @@ class MainWindow extends React.Component {
 export default MainWindow
 
 ReactDOM.render(
-    <MainWindow/>,
+    <MainWindow/>
+    ,
     document.getElementById('root')
 );
 

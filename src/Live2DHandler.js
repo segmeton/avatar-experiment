@@ -1,8 +1,9 @@
 import React from 'react';
-import {Button, TextField, withStyles} from "@material-ui/core";
+import {Button, MenuItem, Select, TextField, withStyles} from "@material-ui/core";
 import {lightBlue} from "@material-ui/core/colors";
 import thank_you_f from "./audio/thank_you_f.mp3";
 import Message from "./utils/Message";
+import {db} from "./database/firebase";
 
 const ColorButton = withStyles(() => ({
     root: {
@@ -26,7 +27,7 @@ const SkipButton = withStyles(() => ({
 export const ColorInput = withStyles(() => ({
     root: {
         display: "block",
-        margin: "10px",
+        marginTop: "10px",
         '& label.Mui-focused': {
             color: 'lightblue',
         },
@@ -60,7 +61,8 @@ class Live2DHandler extends React.Component {
             selectedEmotionIndex: 1,
             isSubmitButtonDisabled: true,
             receivedDescription: "",
-            session: "describing" // describing || voting
+            //session: "describing", // describing || voting
+            numberOfReceivedDescriptions: 0
         }
 
         this.timer = 40000; // in ms
@@ -126,29 +128,43 @@ class Live2DHandler extends React.Component {
     getUkiyoeName = () => this.state.ukiyoeName
     emotionsSelector;
 
-    handleSkip = () => {
-        //TODO
+    handleSkip() {
         this.updateImages();
+        this.props.onSkipButtonClicked()
 
-        this.playSound();
+        // for testing
+        //this.playSound();
 
         // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
     }
 
     handleSubmit = () => {
-        //TODO: add to database
-        console.log("Submitted description: " + this.state.receivedDescription);
+        const numberOfReceivedDescriptions = this.state.numberOfReceivedDescriptions + 1;
+        const receivedDescription = this.state.receivedDescription;
 
-        this.setState(() => ({
-            isSubmitButtonDisabled: true,
-            receivedDescription: ""
-        }));
+        //Add to database
+        db.ref(`descriptions`)
+            .push({
+                description: receivedDescription,
+                participantID: this.props.participantID,
+                imageID: this.getUkiyoeName()
+            }).then(_ => {
+            console.log("Added new description to DB")
+        })
 
         this.updateImages();
 
         this.playSound();
 
-        // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+        //window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+       
+        this.setState(() => ({
+            isSubmitButtonDisabled: true,
+            receivedDescription: "",
+            numberOfReceivedDescriptions: numberOfReceivedDescriptions
+        }));
+
+        this.props.onDescriptionSubmitted()
 
         this.updateExpressionState(true);
 
@@ -204,10 +220,11 @@ class Live2DHandler extends React.Component {
             // }
             thanks.play();
         }
+
     }
 
     keyPress = (e) => {
-        if(e.keyCode === 13){
+        if (e.keyCode === 13) {
             console.log('value', e.target.value);
 
             this.handleSubmit()
@@ -218,10 +235,10 @@ class Live2DHandler extends React.Component {
         const ukiyoeName = this.getUkiyoeName();
         const thanks = "thank_you_f"
 
-        /*let emotionsSelector = [];
+        let emotionsSelector = [];
         for (let i = 0; i < listOfExpressions.length; i++) {
             emotionsSelector.push(<MenuItem key={i} value={listOfExpressions[i]}>{listOfExpressions[i]}</MenuItem>);
-        }*/
+        }
 
         return (
             <div className="row">
@@ -231,7 +248,7 @@ class Live2DHandler extends React.Component {
                              alt="ukiyoe art"/>
                     </div>
                     <div className="row">
-                        {/*<Select
+                        {<Select
                             id="emotion-selector"
                             value={this.state.selectedEmotion}
                             onChange={this.handleEmotionSelector}
@@ -239,12 +256,10 @@ class Live2DHandler extends React.Component {
                             fullWidth
                         >
                             {emotionsSelector}
-                        </Select>*/}
+                        </Select>}
                         <ColorInput
                             onKeyDown={this.keyPress}
                             value={this.state.receivedDescription}
-                            // color="red"
-                            color="secondary"
                             fullWidth
                             id="outlined-basic"
                             label="Your description"

@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -18,44 +17,42 @@ const useStyles = makeStyles({
 export default function WelcomeCard({onChildClick}) {
     const classes = useStyles();
     const [isButtonEnabled, setButtonEnabled] = useState(true);
+    const [participantName, setParticipantName] = useState("")
 
     function handleNameInput(event) {
         let receivedName = event.target.value
 
         setButtonEnabled(!(receivedName.toString().length > 0))
+        setParticipantName(receivedName)
     }
 
     return (
         <Card className={classes.root}>
-            <CardActionArea>
-                <CardMedia
-                    component="img"
-                    alt="ritsumeikan_experiment"
-                    height="140"
-                    image={process.env.PUBLIC_URL + '/welcome_image.jpg'}
-                    title="Welcome card"
-                />
-                <CardContent>
-                    <Typography gutterBottom variant="h5" component="h2">
-                        Welcome
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" component="p">
-                        Enter your name and click "Start" to begin!
-                    </Typography>
-                </CardContent>
-
-            </CardActionArea>
-            <CardActions>
+            <CardMedia
+                component="img"
+                alt="ritsumeikan_experiment"
+                height="140"
+                image={process.env.PUBLIC_URL + '/welcome_image.jpg'}
+                title="Welcome card"
+            />
+            <CardContent>
+                <Typography gutterBottom variant="h5" component="h2">
+                    Welcome
+                </Typography>
+                <Typography variant="body2" color="textSecondary" component="p">
+                    Enter your name and click "Start" to begin!
+                </Typography>
                 <ColorInput
-                    //color="red"
-                    color="secondary"
+                    margin="0px"
                     fullWidth
-                    id="outlined-basic"
                     label="Your name"
                     variant="outlined"
                     onChange={handleNameInput}
                 />
-                <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary" onClick={onChildClick} fullWidth>
+            </CardContent>
+            <CardActions>
+                <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
+                        onClick={() => onChildClick(participantName)} fullWidth>
                     Start
                 </Button>
             </CardActions>
