@@ -55,18 +55,18 @@ export default function ConsentCard({onChildClick}) {
                         //TODO
                     }
                     <EmojiProvider data={emojiData}>
-                        <Emoji className="icon-emoji" name="flag-united-kingdom" width={20}/>
+                        <Emoji className="icon-emoji" name="information" width={20}/>
                     </EmojiProvider>
-                    Some text with warning information
+                    Please fill the questionnaire in the link below before starting the experiment. 
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     {
                         //TODO
                     }
                     <EmojiProvider data={emojiData}>
-                        <Emoji className="icon-emoji" name="flag-japan" width={20}/>
+                        <Emoji className="icon-emoji" name="link" width={20}/>
                     </EmojiProvider>
-                    警告情報を含むテキスト
+                    <a href="https://www.surveymonkey.com/r/8Z5BWG8" target="_blank" rel="noopener noreferrer">https://www.surveymonkey.com/r/8Z5BWG8</a>
                 </Typography>
                 <Select
                     style={{marginTop: '10px'}}

@@ -18,7 +18,7 @@ export default function ThankYouCard() {
 
      const onOpenFormButtonClick = () => {
          //TODO: add link to questionnaire
-        window.open("https://google.com/","_self")
+        window.open("https://www.surveymonkey.com/r/VLQ6MGF","_self")
     }
 
     return (
