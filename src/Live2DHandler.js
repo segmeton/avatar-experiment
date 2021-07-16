@@ -113,6 +113,8 @@ class Live2DHandler extends React.Component {
         //TODO
         this.updateImages();
 
+        this.playSound();
+
         // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
     }
 
@@ -127,11 +129,7 @@ class Live2DHandler extends React.Component {
 
         this.updateImages();
 
-        this.url = "./audio/thank_you.mp3";
-        this.audio = new Audio(thank_you_f);
-        this.audio.crossOrigin = 'anonymous';
-
-        this.audio.play();
+        this.playSound();
 
         // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
 
@@ -155,6 +153,22 @@ class Live2DHandler extends React.Component {
             
     }
 
+    playSound = () => {
+        let thanks = document.getElementById("thanks");
+
+        // let g = Math.floor(Math.random() * 2);
+        // console.log(g);
+
+        if(thanks !== undefined){
+            // if(g == 0){
+            //     thanks.src = require(`./audio/thank_you_f.mp3`).default;
+            // }else{
+            //     thanks.src = require(`./audio/thank_you_m.mp3`).default;
+            // }
+            thanks.play();
+        }
+    }
+
     keyPress = (e) => {
         if(e.keyCode === 13){
             console.log('value', e.target.value);
@@ -165,6 +179,7 @@ class Live2DHandler extends React.Component {
 
     render() {
         const ukiyoeName = this.getUkiyoeName();
+        const thanks = "thank_you_f"
 
         /*let emotionsSelector = [];
         for (let i = 0; i < listOfExpressions.length; i++) {
@@ -216,9 +231,13 @@ class Live2DHandler extends React.Component {
                             Skip
                         </SkipButton>
                     </div>
-                    <div class>
-                        <audio autoPlay loop id="bgm">
+                    <div>
+                        <audio loop id="bgm">
                             <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                        </audio>
+                        <audio id="thanks">
+                            <source src={require(`./audio/${thanks}.mp3`).default} type="audio/mpeg" />
                             Your browser does not support the audio element.
                         </audio>
                     </div>
