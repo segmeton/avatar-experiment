@@ -7,6 +7,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import {ColorInput} from "../Live2DHandler";
+import {FormControlLabel, Radio, RadioGroup} from "@material-ui/core";
 
 const useStyles = makeStyles({
     root: {
@@ -14,7 +15,7 @@ const useStyles = makeStyles({
     },
 });
 
-export default function WelcomeCard({onChildClick}) {
+export default function WelcomeCard({onStartDescriptionRoundClick, onGroupSelected}) {
     const classes = useStyles();
     const [isButtonEnabled, setButtonEnabled] = useState(true);
     const [participantName, setParticipantName] = useState("")
@@ -40,8 +41,12 @@ export default function WelcomeCard({onChildClick}) {
                     Welcome
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    Enter your name and click "Start" to begin!
+                    Enter your name, select your group, and click "Start" to begin!
                 </Typography>
+                    <RadioGroup row aria-label="group_number" defaultValue="group_emotions" name="gender1" onChange={onGroupSelected} >
+                        <FormControlLabel value="group_emotions" labelPlacement="end" control={<Radio />} label="Group A" />
+                        <FormControlLabel value="group_static" labelPlacement="end" control={<Radio />} label="Group B" />
+                    </RadioGroup>
                 <ColorInput
                     margin="none"
                     fullWidth
@@ -52,7 +57,7 @@ export default function WelcomeCard({onChildClick}) {
             </CardContent>
             <CardActions>
                 <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
-                        onClick={() => onChildClick(participantName)} fullWidth>
+                        onClick={() => onStartDescriptionRoundClick(participantName)} fullWidth>
                     Start
                 </Button>
             </CardActions>
