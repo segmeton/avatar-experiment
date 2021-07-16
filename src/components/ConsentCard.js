@@ -55,7 +55,7 @@ export default function ConsentCard({onChildClick}) {
                         //TODO
                     }
                     <EmojiProvider data={emojiData}>
-                        <Emoji class="icon-emoji" name="flag-united-kingdom" width={20}/>
+                        <Emoji className="icon-emoji" name="flag-united-kingdom" width={20}/>
                     </EmojiProvider>
                     Some text with warning information
                 </Typography>
@@ -64,7 +64,7 @@ export default function ConsentCard({onChildClick}) {
                         //TODO
                     }
                     <EmojiProvider data={emojiData}>
-                        <Emoji class="icon-emoji" name="flag-japan" width={20}/>
+                        <Emoji className="icon-emoji" name="flag-japan" width={20}/>
                     </EmojiProvider>
                     警告情報を含むテキスト
                 </Typography>
@@ -88,7 +88,7 @@ export default function ConsentCard({onChildClick}) {
             </CardContent>
             <CardActions>
                 <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
-                        onClick={() => onChildClick()} fullWidth>
+                        onClick={() => onChildClick(selectedLanguage)} fullWidth>
                     Continue
                 </Button>
             </CardActions>

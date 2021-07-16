@@ -36,7 +36,10 @@ class MainWindow extends React.Component {
             participantName: "",
             participantID: 0,
             totalNumberOfDescriptions: 0,
-            totalNumberOfSkipped: 0
+            totalNumberOfSkipped: 0,
+            language: "English", // English || 日本語
+            isAgreeToConsent: false,
+            dbEnabled: true,
         };
 
         this.timer = 0;
@@ -51,11 +54,14 @@ class MainWindow extends React.Component {
         let timeLeftVar = secondsToTime(this.state.seconds);
         this.setState({time: timeLeftVar});
 
-        db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
-            snapshot.forEach(function (data) {
-                console.log(data.val().description)
+        if(this.state.dbEnabled){
+            db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
+                snapshot.forEach(function (data) {
+                    console.log(data.val().description)
+                });
             });
-        });
+        }
+        
     }
 
     showEndingAlert = () => {
@@ -70,7 +76,9 @@ class MainWindow extends React.Component {
 
         window.onbeforeunload = null;
 
-        db.ref(`participants/${this.state.participantID}`)
+        if(this.state.dbEnabled)
+        {
+            db.ref(`participants/${this.state.participantID}`)
             .update({
                 totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
                 totalNumberOfSkipped: this.state.totalNumberOfSkipped,
@@ -79,6 +87,17 @@ class MainWindow extends React.Component {
             .then(() => {
                 console.log("Updated information about current participant to DB")
             });
+        }
+     
+    }
+
+    consentAccept = (language) => {
+        this.setState({
+            language: language,
+            isAgreeToConsent: true
+        });
+        console.log(this.state.language);
+        this.changeState();
     }
 
     changeState = () => {
@@ -103,21 +122,26 @@ class MainWindow extends React.Component {
         //https://www.npmjs.com/package/uuid
         const uuid = uuidv4().toString();
 
-        db.ref(`participants/${uuid}`)
+        
+        if(this.state.dbEnabled){
+            db.ref(`participants/${uuid}`)
             .set({
                 participantName,
                 participantID: uuid,
-                finishedSuccessfully: false
+                finishedSuccessfully: false,
+                language: this.state.language,
+                isAgreeToConsent: this.state.isAgreeToConsent
             })
             .then(() => {
                 console.log("Added new participant to DB")
             });
 
-        this.setState({
-            participantName: participantName,
-            participantID: uuid
-        });
-
+            this.setState({
+                participantName: participantName,
+                participantID: uuid
+            });
+        }
+        
         this.changeState()
     }
 
@@ -165,7 +189,7 @@ class MainWindow extends React.Component {
                     </div>
                 </header>
                 <main className="container">
-                    <ConsentCard onChildClick={this.changeState.bind(this)}/>
+                    <ConsentCard onChildClick={this.consentAccept.bind(this)}/>
                 </main>
                 <footer>
                     <div className="footer-container">

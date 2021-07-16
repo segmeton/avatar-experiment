@@ -43,7 +43,7 @@ export default function WelcomeCard({onChildClick}) {
                     Enter your name and click "Start" to begin!
                 </Typography>
                 <ColorInput
-                    margin="0px"
+                    margin="none"
                     fullWidth
                     label="Your name"
                     variant="outlined"

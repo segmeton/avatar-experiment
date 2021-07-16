@@ -61,8 +61,9 @@ class Live2DHandler extends React.Component {
             selectedEmotionIndex: 1,
             isSubmitButtonDisabled: true,
             receivedDescription: "",
-            //session: "describing", // describing || voting
-            numberOfReceivedDescriptions: 0
+            session: "describing", // describing || voting
+            numberOfReceivedDescriptions: 0,
+            dbEnabled: true
         }
 
         this.timer = 40000; // in ms
@@ -143,14 +144,17 @@ class Live2DHandler extends React.Component {
         const receivedDescription = this.state.receivedDescription;
 
         //Add to database
-        db.ref(`descriptions`)
+        if(this.state.dbEnabled){
+            db.ref(`descriptions`)
             .push({
                 description: receivedDescription,
                 participantID: this.props.participantID,
                 imageID: this.getUkiyoeName()
             }).then(_ => {
-            console.log("Added new description to DB")
-        })
+                console.log("Added new description to DB")
+            });
+        }
+
 
         this.updateImages();
 
@@ -235,10 +239,10 @@ class Live2DHandler extends React.Component {
         const ukiyoeName = this.getUkiyoeName();
         const thanks = "thank_you_f"
 
-        let emotionsSelector = [];
-        for (let i = 0; i < listOfExpressions.length; i++) {
-            emotionsSelector.push(<MenuItem key={i} value={listOfExpressions[i]}>{listOfExpressions[i]}</MenuItem>);
-        }
+        // let emotionsSelector = [];
+        // for (let i = 0; i < listOfExpressions.length; i++) {
+        //     emotionsSelector.push(<MenuItem key={i} value={listOfExpressions[i]}>{listOfExpressions[i]}</MenuItem>);
+        // }
 
         return (
             <div className="row">
@@ -248,7 +252,7 @@ class Live2DHandler extends React.Component {
                              alt="ukiyoe art"/>
                     </div>
                     <div className="row">
-                        {<Select
+                        {/* {<Select
                             id="emotion-selector"
                             value={this.state.selectedEmotion}
                             onChange={this.handleEmotionSelector}
@@ -256,7 +260,7 @@ class Live2DHandler extends React.Component {
                             fullWidth
                         >
                             {emotionsSelector}
-                        </Select>}
+                        </Select>} */}
                         <ColorInput
                             onKeyDown={this.keyPress}
                             value={this.state.receivedDescription}
@@ -284,7 +288,8 @@ class Live2DHandler extends React.Component {
                         </SkipButton>
                     </div>
                     <div>
-                        <audio loop id="bgm">
+                        <audio autoPlay loop id="bgm">
+                        {/* <audio loop id="bgm"> */}
                             <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default} type="audio/mpeg" />
                             Your browser does not support the audio element.
                         </audio>
