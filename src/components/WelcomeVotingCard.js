@@ -7,7 +7,6 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import {ColorInput} from "../Live2DHandler";
-import {FormControlLabel, Radio, RadioGroup} from "@material-ui/core";
 
 const useStyles = makeStyles({
     root: {
@@ -15,16 +14,16 @@ const useStyles = makeStyles({
     },
 });
 
-export default function WelcomeCard({onStartDescriptionRoundClick, onGroupSelected}) {
+export default function WelcomeVotingCard({onStartVotingRoundClick}) {
     const classes = useStyles();
     const [isButtonEnabled, setButtonEnabled] = useState(true);
-    const [participantName, setParticipantName] = useState("")
+    const [participantCode, setParticipantCode] = useState("")
 
-    function handleNameInput(event) {
-        let receivedName = event.target.value
+    function handleCodeInput(event) {
+        let receivedCode = event.target.value
 
-        setButtonEnabled(!(receivedName.toString().length > 0))
-        setParticipantName(receivedName)
+        setButtonEnabled(!(receivedCode.toString().length > 0))
+        setParticipantCode(receivedCode)
     }
 
     return (
@@ -33,32 +32,29 @@ export default function WelcomeCard({onStartDescriptionRoundClick, onGroupSelect
                 component="img"
                 alt="ritsumeikan_experiment"
                 height="140"
-                image={process.env.PUBLIC_URL + '/welcome_image.jpg'}
-                title="Welcome card"
+                image={process.env.PUBLIC_URL + '/voting_stage_image.jpg'}
+                title="Welcome voting card"
             />
             <CardContent>
                 <Typography gutterBottom variant="h5" component="h2">
                     Welcome
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    Welcome to the description stage. Here you will need to create descriptions for displayed images. Enter your name, select your group, and click "Start" to begin!
+                    Welcome to the voting stage! Here you will vote for the best descriptions for each image. Please, enter your code to get started!
                 </Typography>
-                    <RadioGroup row aria-label="group_number" defaultValue="group_emotions" name="gender1" onChange={onGroupSelected} >
-                        <FormControlLabel value="group_emotions" labelPlacement="end" control={<Radio />} label="Group A" />
-                        <FormControlLabel value="group_static" labelPlacement="end" control={<Radio />} label="Group B" />
-                    </RadioGroup>
+
                 <ColorInput
                     margin="none"
                     fullWidth
-                    label="Your name"
+                    label="Your personal code"
                     variant="outlined"
-                    onChange={handleNameInput}
+                    onChange={handleCodeInput}
                 />
             </CardContent>
             <CardActions>
                 <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
-                        onClick={() => onStartDescriptionRoundClick(participantName)} fullWidth>
-                    Start
+                        onClick={() => onStartVotingRoundClick(participantCode)} fullWidth>
+                    Enter
                 </Button>
             </CardActions>
         </Card>
