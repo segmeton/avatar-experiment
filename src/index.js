@@ -137,7 +137,8 @@ class MainWindow extends React.Component {
                     participantID: uuid,
                     finishedSuccessfully: false,
                     language: this.state.language,
-                    isAgreeToConsent: this.state.isAgreeToConsent
+                    isAgreeToConsent: this.state.isAgreeToConsent,
+                    selectedGroup: this.state.selectedGroup
                 })
                 .then(() => {
                     console.log("Added new participant to DB")
