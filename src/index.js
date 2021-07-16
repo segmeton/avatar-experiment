@@ -11,11 +11,12 @@ import {v4 as uuidv4} from 'uuid';
 import ConsentCard from "./components/ConsentCard";
 import WelcomeVotingCard from "./components/WelcomeVotingCard";
 import {PasswordAlertDialog} from "./components/PasswordAlertDialog";
+import ShowPasswordAlertDialog from "./components/ShowPasswordAlertDialog";
 
 const currentDate = new Date().toLocaleDateString();
 
 //CHANGE THIS FOR VOTING
-const isVoting = true
+const isVoting = false
 
 // experiment time : description(5min=>5*60)
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
@@ -45,7 +46,8 @@ class MainWindow extends React.Component {
             language: "English", // English || 日本語
             isAgreeToConsent: false,
             dbEnabled: true,
-            selectedGroup: "group_emotions"
+            selectedGroup: "group_emotions",
+            password: ""
         };
 
         this.timer = 0;
@@ -54,6 +56,7 @@ class MainWindow extends React.Component {
 
         this.changeState = this.changeState.bind(this);
         this.startDescriptionRound = this.startDescriptionRound.bind(this);
+        this.prepareForDescriptionRound = this.prepareForDescriptionRound.bind(this);
     }
 
     componentDidMount() {
@@ -100,11 +103,6 @@ class MainWindow extends React.Component {
 
     changeState = (stageIndex) => {
         currentStateIndex = stageIndex
-        /*if (currentStateIndex === 3) {
-            currentStateIndex = 0
-        } else {
-            currentStateIndex++
-        }*/
 
         this.timer = 0
 
@@ -143,11 +141,13 @@ class MainWindow extends React.Component {
 
                     self.setState({
                         participantName: receivedParticipantName,
-                        participantID: receivedParticipantID
+                        participantID: receivedParticipantID,
+                        password: participantCode
                     });
                 });
 
                 if (snapshot.numChildren() > 0 && receivedParticipantID !== "0") {
+                    console.log("Participant ID: " + receivedParticipantID + ", name: " + receivedParticipantName)
                     self.changeState(5)
                 } else {
                     self.child.openPasswordAlertDialog()
@@ -157,9 +157,7 @@ class MainWindow extends React.Component {
         }
     }
 
-    startDescriptionRound = (participantName) => {
-        console.log("Name of a participant: " + participantName)
-
+    prepareForDescriptionRound = (participantName) => {
         //https://www.npmjs.com/package/uuid
         const uuid = uuidv4().toString();
         const password = uuid.substring(0, 4) + "-" + uuid.substr(uuid.length - 4)
@@ -167,6 +165,12 @@ class MainWindow extends React.Component {
         console.log("Generated password: " + password)
 
         if (this.state.dbEnabled) {
+            this.setState({
+                participantName: participantName,
+                participantID: uuid,
+                password: password
+            });
+
             db.ref(`participants/${uuid}`)
                 .set({
                     participantName,
@@ -178,15 +182,13 @@ class MainWindow extends React.Component {
                     password: password
                 })
                 .then(() => {
-                    console.log("Added new participant to DB")
+                    console.log("Added new participant to DB: " + this.state.password)
+                    this.child.openShowGeneratedPasswordAlertDialog()
                 });
-
-            this.setState({
-                participantName: participantName,
-                participantID: uuid
-            });
         }
+    }
 
+    startDescriptionRound = () => {
         this.changeState(2)
     }
 
@@ -251,8 +253,13 @@ class MainWindow extends React.Component {
                 </header>
                 <main className="container">
                     <WelcomeCard
-                        onStartDescriptionRoundClick={this.startDescriptionRound.bind(this)}
+                        onStartDescriptionRoundClick={this.prepareForDescriptionRound.bind(this)}
                         onGroupSelected={this.onGroupSelected.bind(this)}/>
+                    <ShowPasswordAlertDialog
+                        onRef={ref => (this.child = ref)}
+                        password={this.state.password}
+                        startDescriptionRound={this.startDescriptionRound.bind(this)}
+                    />
                 </main>
                 <footer>
                     <div className="footer-container">
