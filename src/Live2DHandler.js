@@ -56,6 +56,7 @@ class Live2DHandler extends React.Component {
 
         this.state = {
             ukiyoeName: 1,
+            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -71,6 +72,8 @@ class Live2DHandler extends React.Component {
         this.msgObj = new Message(this.timer);
 
         this.usedExpression = ["sad_1", "normal", "very_happy"];
+
+        this.state.ukiyoeAllImages.splice(0, 1);
 
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -99,10 +102,33 @@ class Live2DHandler extends React.Component {
     }
 
     updateImages = () => {
+        const items = this.state.ukiyoeAllImages
+        console.log(items.length + " | " + items.toString())
+
+        if(items.length > 0) {
+            const nextImage = items[Math.floor(Math.random() * items.length)]
+            this.setState(() => ({
+                ukiyoeName: nextImage
+            }));
+
+            const index = items.indexOf(nextImage);
+            items.splice(index, 1);
+
+            this.setState(() => ({
+                ukiyoeAllImages: items
+            }));
+
+            console.log(items.length + " | " + items.toString())
+        } else {
+            this.props.onDescriptionsFinished()
+        }
+    }
+
+    /*updateImages = () => {
         this.setState(() => ({
             ukiyoeName: Math.floor(Math.random() * 20) + 1
         }));
-    }
+    }*/
 
     handleEmotionSelector = (event) => {
         this.updateEmotion(event.target.value)
@@ -152,7 +178,8 @@ class Live2DHandler extends React.Component {
             .push({
                 description: receivedDescription,
                 participantID: this.props.participantID,
-                imageID: this.getUkiyoeName()
+                imageID: this.getUkiyoeName(),
+                date: new Date().toLocaleString()
             }).then(_ => {
                 console.log("Added new description to DB")
             });

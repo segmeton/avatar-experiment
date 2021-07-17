@@ -17,11 +17,10 @@ import VotingHandler from "./VotingHandler";
 const currentDate = new Date().toLocaleDateString();
 
 //CHANGE THIS FOR VOTING
-const isVoting = true
+const isVoting = false
 
 // experiment time : description(5min=>5*60)
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
-//TODO: normal time for voting stage
 const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 300}
 let currentStateIndex = 0;
 
@@ -67,7 +66,7 @@ class MainWindow extends React.Component {
         this.setState({time: timeLeftVar});
     }
 
-    triggerEndingAlertVoting = () => {
+    triggerEndingAlert = () => {
         this.setState({
             time: secondsToTime(1),
             seconds: 1,
@@ -86,17 +85,16 @@ class MainWindow extends React.Component {
 
         window.onbeforeunload = null;
 
-        if (this.state.dbEnabled) {
+        /*if (this.state.dbEnabled) {
             db.ref(`voting/${this.state.participantID}`)
                 .update({
                     participant: this.state.participantID,
-                    //TODO
                     numberOfVotes: 0
                 })
                 .then(() => {
                     console.log("Updated information about current participant to DB [Voting]")
                 });
-        }
+        }*/
     }
 
     showEndingAlertDescription = () => {
@@ -115,7 +113,8 @@ class MainWindow extends React.Component {
                 .update({
                     totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
                     totalNumberOfSkipped: this.state.totalNumberOfSkipped,
-                    finishedSuccessfully: true
+                    finishedSuccessfully: true,
+                    date: new Date().toLocaleString()
                 })
                 .then(() => {
                     console.log("Updated information about current participant to DB [Description]")
@@ -169,7 +168,6 @@ class MainWindow extends React.Component {
             let receivedParticipantName = "_";
             const self = this;
             db.ref('participants/').orderByChild('password').equalTo(participantCode).on("value", function (snapshot) {
-
                 snapshot.forEach(function (data) {
                     receivedParticipantID = data.val().participantID
                     receivedParticipantName = data.val().participantName
@@ -322,6 +320,7 @@ class MainWindow extends React.Component {
                             participantID={this.state.participantID}
                             onSkipButtonClicked={this.onSkipButtonClicked}
                             onDescriptionSubmitted={this.onDescriptionSubmitted}
+                            onDescriptionsFinished={this.triggerEndingAlert}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
@@ -368,7 +367,7 @@ class MainWindow extends React.Component {
                         <VotingHandler
                             selectedGroup={this.state.selectedGroup}
                             participantID={this.state.participantID}
-                            onVotingFinished={this.triggerEndingAlertVoting}
+                            onVotingFinished={this.triggerEndingAlert}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
