@@ -31,7 +31,6 @@ footer{
 .container{
     max-width: 1140px;
     margin: auto;
-    overflow: hidden;
 }
 
 .row{
@@ -42,6 +41,23 @@ footer{
 .col-6{
     flex: 0 0 50%;
     max-width: 50%;
+}
+
+.row-voting{
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.topPane {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.bottomPane {
+    grid-column: 2;
+    grid-row: 1;
 }
 
 .img-responsive{
@@ -57,6 +73,14 @@ footer{
     display: block;
     margin-bottom: 20px;
     margin-top: 20px;
+}
+
+.ukiyoe-responsive-voting{
+    max-width: 100%;
+    display: block;
+    width: auto !important; /*Keep the aspect ratio of the image*/
+    height: 250px !important;
+    margin: 0 auto 1em auto; /*Center the image*/
 }
 
 .icon-emoji {
