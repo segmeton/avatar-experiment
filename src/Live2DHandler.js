@@ -70,7 +70,7 @@ class Live2DHandler extends React.Component {
 
         this.msgObj = new Message(this.timer);
 
-        this.usedExpression = ["sad_1", "normal", "very_happy"];
+        this.usedExpression = ["disappointed", "sad_1", "normal", "happy", "very_happy"];
 
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -179,9 +179,15 @@ class Live2DHandler extends React.Component {
     }
 
     updateExpressionState = (isUp) => {
+        // 0 : negative
+        // 1 : neutral
+        // 2 : positive
         if(isUp){
             let newIndex = this.state.selectedEmotionIndex + 1;
-            if(newIndex <= this.usedExpression.length - 1){
+            if(newIndex > 2){
+                newIndex = 2;
+            }
+            if(newIndex <= 2){
                 return this.updateSelectedEmotion(newIndex);
             }
             return null;
@@ -207,10 +213,22 @@ class Live2DHandler extends React.Component {
     }
 
     updateSelectedEmotion = (newIndex) => {
-        this.updateEmotion(this.usedExpression[newIndex]);
         this.setState(() => ({
             selectedEmotionIndex: newIndex
         }));
+        
+        let newEmotion = 2;
+       
+        if(newIndex == 2){
+            newEmotion = Math.floor(Math.random() * 2) + 3;
+        }
+
+        if(newIndex == 0){
+            newEmotion = Math.floor(Math.random() * 2);
+        }
+
+        this.updateEmotion(this.usedExpression[newEmotion]);
+        
     }
 
     playSound = () => {
