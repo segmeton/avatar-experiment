@@ -9,12 +9,18 @@ import EndingAlertDialog from "./components/EndingAlertDialog";
 import {db} from "./database/firebase";
 import {v4 as uuidv4} from 'uuid';
 import ConsentCard from "./components/ConsentCard";
+import WelcomeVotingCard from "./components/WelcomeVotingCard";
+import {PasswordAlertDialog} from "./components/PasswordAlertDialog";
+import ShowPasswordAlertDialog from "./components/ShowPasswordAlertDialog";
 
 const currentDate = new Date().toLocaleDateString();
 
+//CHANGE THIS FOR VOTING
+const isVoting = false
+
 // experiment time : description(5min=>5*60)
-const gameStages = ["consent", "welcome", "description", "results"];
-const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0}
+const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
+const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 100}
 let currentStateIndex = 0;
 
 class Doc extends React.Component {
@@ -32,15 +38,17 @@ class MainWindow extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            stage: gameStages[0],
+            stage: "consent",
             participantName: "",
-            participantID: 0,
+            participantID: "0",
             totalNumberOfDescriptions: 0,
             totalNumberOfSkipped: 0,
             language: "English", // English || 日本語
             isAgreeToConsent: false,
             dbEnabled: true,
-            selectedGroup: "group_emotions"
+            selectedGroup: "group_emotions",
+            password: "",
+            session: "Describing"
         };
 
         this.timer = 0;
@@ -49,24 +57,15 @@ class MainWindow extends React.Component {
 
         this.changeState = this.changeState.bind(this);
         this.startDescriptionRound = this.startDescriptionRound.bind(this);
+        this.prepareForDescriptionRound = this.prepareForDescriptionRound.bind(this);
     }
 
     componentDidMount() {
         let timeLeftVar = secondsToTime(this.state.seconds);
         this.setState({time: timeLeftVar});
-
-        if (this.state.dbEnabled) {
-            db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
-                snapshot.forEach(function (data) {
-                    console.log(data.val().description)
-                });
-            });
-        }
-
     }
 
     showEndingAlert = () => {
-
         let bgm = document.getElementById("bgm");
 
         if (bgm !== undefined) {
@@ -88,7 +87,6 @@ class MainWindow extends React.Component {
                     console.log("Updated information about current participant to DB")
                 });
         }
-
     }
 
     consentAccept = (language) => {
@@ -97,15 +95,15 @@ class MainWindow extends React.Component {
             isAgreeToConsent: true
         });
         console.log(this.state.language);
-        this.changeState();
+        if (isVoting === true) {
+            this.changeState(4);
+        } else {
+            this.changeState(1);
+        }
     }
 
-    changeState = () => {
-        if (currentStateIndex === 3) {
-            currentStateIndex = 0
-        } else {
-            currentStateIndex++
-        }
+    changeState = (stageIndex) => {
+        currentStateIndex = stageIndex
 
         this.timer = 0
 
@@ -124,13 +122,56 @@ class MainWindow extends React.Component {
         console.log("Selected group: " + event.target.value)
     }
 
-    startDescriptionRound = (participantName) => {
-        console.log("Name of a participant: " + participantName)
+    startVotingRound = (participantCode) => {
+        /*if (this.state.dbEnabled) {
+            db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
+                snapshot.forEach(function (data) {
+                    console.log(data.val().description)
+                });
+            });
+        }*/
+        if (this.state.dbEnabled) {
+            let receivedParticipantID = "0";
+            let receivedParticipantName = "_";
+            const self = this;
+            db.ref('participants/').orderByChild('password').equalTo(participantCode).on("value", function (snapshot) {
 
+                snapshot.forEach(function (data) {
+                    receivedParticipantID = data.val().participantID
+                    receivedParticipantName = data.val().participantName
+
+                    self.setState({
+                        participantName: receivedParticipantName,
+                        participantID: receivedParticipantID,
+                        password: participantCode
+                    });
+                });
+
+                if (snapshot.numChildren() > 0 && receivedParticipantID !== "0") {
+                    console.log("Participant ID: " + receivedParticipantID + ", name: " + receivedParticipantName)
+                    self.changeState(5)
+                } else {
+                    self.child.openPasswordAlertDialog()
+                    console.log("error, wrong password")
+                }
+            })
+        }
+    }
+
+    prepareForDescriptionRound = (participantName) => {
         //https://www.npmjs.com/package/uuid
         const uuid = uuidv4().toString();
+        const password = uuid.substring(0, 4) + "-" + uuid.substr(uuid.length - 4)
+
+        console.log("Generated password: " + password)
 
         if (this.state.dbEnabled) {
+            this.setState({
+                participantName: participantName,
+                participantID: uuid,
+                password: password
+            });
+
             db.ref(`participants/${uuid}`)
                 .set({
                     participantName,
@@ -138,23 +179,21 @@ class MainWindow extends React.Component {
                     finishedSuccessfully: false,
                     language: this.state.language,
                     isAgreeToConsent: this.state.isAgreeToConsent,
-                    selectedGroup: this.state.selectedGroup
+                    group: this.state.selectedGroup,
+                    password: password
                 })
                 .then(() => {
-                    console.log("Added new participant to DB")
+                    console.log("Added new participant to DB: " + this.state.password)
+                    this.child.openShowGeneratedPasswordAlertDialog()
                 });
-
-            this.setState({
-                participantName: participantName,
-                participantID: uuid
-            });
         }
+    }
 
-        this.changeState()
+    startDescriptionRound = () => {
+        this.changeState(2)
     }
 
     onSkipButtonClicked = () => {
-
         console.log("Skip! clicked in child")
         this.setState({
             totalNumberOfSkipped: this.state.totalNumberOfSkipped + 1
@@ -188,7 +227,7 @@ class MainWindow extends React.Component {
     }
 
     CurrentStagePage = () => {
-        if (this.state.stage === gameStages[0]) {
+        if (this.state.stage === gameStages[0]) { //CONSENT STAGE
             return (<React.StrictMode>
                 <Doc/>
                 <header className="header">
@@ -215,8 +254,13 @@ class MainWindow extends React.Component {
                 </header>
                 <main className="container">
                     <WelcomeCard
-                        onStartDescriptionRoundClick={this.startDescriptionRound.bind(this)}
+                        onStartDescriptionRoundClick={this.prepareForDescriptionRound.bind(this)}
                         onGroupSelected={this.onGroupSelected.bind(this)}/>
+                    <ShowPasswordAlertDialog
+                        onRef={ref => (this.child = ref)}
+                        password={this.state.password}
+                        startDescriptionRound={this.startDescriptionRound.bind(this)}
+                    />
                 </main>
                 <footer>
                     <div className="footer-container">
@@ -234,7 +278,7 @@ class MainWindow extends React.Component {
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Description session: {stringTime}</h1>}
+                            {<h1 className="title">Describing session: {stringTime}</h1>}
                         </div>
                     </header>
                     {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
@@ -254,6 +298,27 @@ class MainWindow extends React.Component {
                     </footer>
                 </React.StrictMode>
             )
+        } else if (this.state.stage === gameStages[4]) { //WELCOME TO VOTING STAGE
+            return (<React.StrictMode>
+                <Doc/>
+                <header className="header">
+                    <div className="header-container">
+                        <h1 className="title">Welcome: Voting Stage</h1>
+                    </div>
+                </header>
+                <main className="container">
+                    <WelcomeVotingCard
+                        onStartVotingRoundClick={this.startVotingRound.bind(this)}/>
+                    <PasswordAlertDialog onRefPass={ref => (this.child = ref)}/>
+                </main>
+                <footer>
+                    <div className="footer-container">
+                        <span>Ritsumeikan University - Intelligent Computer Entertainment Lab</span>
+                    </div>
+                </footer>
+            </React.StrictMode>)
+        } else if (this.state.stage === gameStages[5]) { //VOTING STAGE
+            return "VOTING"
         }
 
         return "THE END. THANK YOU"
