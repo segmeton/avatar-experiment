@@ -1,4 +1,4 @@
-body{
+body {
     background-color: snow;
 }
 
@@ -9,7 +9,7 @@ body{
     flex-direction:column;
 }
 
-header{
+header {
     margin-bottom: 2rem;
     background-color: #f8f9fa;
 }

@@ -1,3 +1,5 @@
+//Deployment: https://medium.com/swlh/how-to-deploy-a-react-app-with-firebase-hosting-98063c5bf425
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
