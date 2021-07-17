@@ -226,7 +226,6 @@ class MainWindow extends React.Component {
     }
 
     onSkipButtonClicked = () => {
-        console.log("Skip! clicked in child")
         this.setState({
             totalNumberOfSkipped: this.state.totalNumberOfSkipped + 1
         })

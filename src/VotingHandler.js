@@ -54,14 +54,15 @@ class VotingHandler extends React.Component {
             session: "voting", // describing || votin
             dbEnabled: true,
             loadedDescriptions: [],
-            showLoadingIndicator: true
+            showLoadingIndicator: true,
+            descriptionsSkippedInARow: 0
         }
 
         this.timer = 40000; // in ms
 
         this.msgObj = new Message(this.timer);
 
-        this.usedExpression = ["sad_1", "normal", "very_happy"];
+        this.usedExpression = ["disappointed", "sad_1", "normal", "happy", "very_happy"];
 
         this.state.ukiyoeAllImages.splice(0, 1);
         this.loadDescriptionsForUkiyoe(1)
@@ -120,10 +121,6 @@ class VotingHandler extends React.Component {
         }
     }
 
-    handleEmotionSelector = (event) => {
-        this.updateEmotion(event.target.value)
-    };
-
     updateEmotion = (value) => {
         this.setState(() => ({
             selectedEmotion: value
@@ -163,14 +160,24 @@ class VotingHandler extends React.Component {
         }
 
         this.updateImages();
+
+        this.updateExpressionState(true);
+        this.playSound();
     }
 
     handleSkip() {
         this.setState(() => ({
-            showLoadingIndicator: true
+            showLoadingIndicator: true,
+            descriptionsSkippedInARow: this.state.descriptionsSkippedInARow + 1
         }));
 
         this.updateImages();
+
+        console.log("Number of skips: " + this.state.descriptionsSkippedInARow)
+
+        if (this.state.descriptionsSkippedInARow >= 5) {
+            this.updateExpressionState(false);
+        }
 
         /*this.setState(() => ({
 
@@ -187,18 +194,20 @@ class VotingHandler extends React.Component {
         // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
     }
 
-
     updateExpressionState = (isUp) => {
-        if (isUp) {
+        // 0 : negative
+        // 1 : neutral
+        // 2 : positive
+        if(isUp){
             let newIndex = this.state.selectedEmotionIndex + 1;
-            if (newIndex <= this.usedExpression.length - 1) {
-                return this.updateSelectedEmotion(newIndex);
+            if(newIndex > 4){
+                newIndex = 4;
             }
-            return null;
+            return this.updateSelectedEmotion(newIndex);
         }
 
         let newIndex = this.state.selectedEmotionIndex - 1;
-        if (newIndex >= 0) {
+        if(newIndex >= 0){
             return this.updateSelectedEmotion(newIndex);
         }
         return null;
