@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, List, ListItem, ListItemText, Paper, TextField, withStyles} from "@material-ui/core";
+import {Button, CircularProgress, List, ListItem, ListItemText, Paper, TextField, withStyles} from "@material-ui/core";
 import thank_you_f from "./audio/thank_you_f.mp3";
 import Message from "./utils/Message";
 import {db} from "./database/firebase";
@@ -52,7 +52,8 @@ class VotingHandler extends React.Component {
             selectedEmotionIndex: 1,
             session: "voting", // describing || votin
             dbEnabled: true,
-            loadedDescriptions: []
+            loadedDescriptions: [],
+            showLoadingIndicator: true
         }
 
         this.timer = 40000; // in ms
@@ -61,7 +62,7 @@ class VotingHandler extends React.Component {
 
         this.usedExpression = ["sad_1", "normal", "very_happy"];
 
-        this.loadDescriptionsForUkiyoe(this.state.ukiyoeName)
+        this.loadDescriptionsForUkiyoe(1)
 
         this.handleSelectedDescription = this.handleSelectedDescription.bind(this);
     }
@@ -90,11 +91,12 @@ class VotingHandler extends React.Component {
     }
 
     updateImages = () => {
+        const nextImage = Math.floor(Math.random() * 20) + 1
         this.setState(() => ({
-            ukiyoeName: Math.floor(Math.random() * 20) + 1
+            ukiyoeName: nextImage
         }));
 
-        this.loadDescriptionsForUkiyoe(this.state.ukiyoeName)
+        this.loadDescriptionsForUkiyoe(nextImage)
     }
 
     handleEmotionSelector = (event) => {
@@ -117,13 +119,17 @@ class VotingHandler extends React.Component {
     emotionsSelector;
 
     handleSelectedDescription = () => {
+        this.setState(() => ({
+            showLoadingIndicator: true
+        }));
+
         this.updateImages();
-        console.log("HEllo")
     }
 
     handleSkip() {
-        //this.updateImages();
-        //this.props.onSkipButtonClicked()
+        this.setState(() => ({
+            showLoadingIndicator: true
+        }));
 
         this.updateImages();
         this.playSound();
@@ -194,8 +200,11 @@ class VotingHandler extends React.Component {
                     loadedDescriptionsFromFirebase.push(data.val().description)
                 });
 
+                console.log("Descriptions for image " + imageID + ": " + loadedDescriptionsFromFirebase.toString())
+
                 self.setState(() => ({
-                    loadedDescriptions: loadedDescriptionsFromFirebase
+                    loadedDescriptions: loadedDescriptionsFromFirebase,
+                    showLoadingIndicator: false
                 }));
             });
         }
@@ -214,15 +223,17 @@ class VotingHandler extends React.Component {
                          alt="ukiyoe art"/>
                     <div>
                         <h3>Select the best description for this image:</h3>
-                        <Paper style={{maxHeight: 200, overflow: 'auto'}}>
-                            <List component="nav" fullWidth>
-                                {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
-                                    return <ListItem button onClick={self.handleSelectedDescription}>
-                                        <ListItemText primary={object.toString()}/>
-                                    </ListItem>
-                                }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this picture. Just press "Skip" to continue.</Alert>}
-                            </List>
-                        </Paper>
+                        {this.state.showLoadingIndicator ? <CircularProgress color="secondary" /> :
+                            <Paper style={{maxHeight: 200, overflow: 'auto'}}>
+                                <List component="nav" fullWidth>
+                                    {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
+                                        return <ListItem button onClick={self.handleSelectedDescription}>
+                                            <ListItemText primary={object.toString()}/>
+                                        </ListItem>
+                                    }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
+                                        picture. Just press "Skip" to continue.</Alert>}
+                                </List>
+                            </Paper>}
                         <SkipButton
                             variant="outlined"
                             color="secondary"

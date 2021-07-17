@@ -17,10 +17,11 @@ import VotingHandler from "./VotingHandler";
 const currentDate = new Date().toLocaleDateString();
 
 //CHANGE THIS FOR VOTING
-const isVoting = false
+const isVoting = true
 
 // experiment time : description(5min=>5*60)
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
+//TODO: normal time for voting stage
 const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 10000000}
 let currentStateIndex = 0;
 

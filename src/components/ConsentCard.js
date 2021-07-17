@@ -51,18 +51,12 @@ export default function ConsentCard({onChildClick}) {
                     重要な情報
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    {
-                        //TODO
-                    }
                     <EmojiProvider data={emojiData}>
                         <Emoji className="icon-emoji" name="information" width={20}/>
                     </EmojiProvider>
                     Please fill the consent form in the link below before starting the experiment. <br/>実験を開始する前に、以下のリンクの同意書に記入してください。 
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    {
-                        //TODO
-                    }
                     <EmojiProvider data={emojiData}>
                         <Emoji className="icon-emoji" name="link" width={20}/>
                     </EmojiProvider>
