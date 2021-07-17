@@ -15,8 +15,7 @@ export function secondsToTime(secs) {
     };
 }
 
-
-export function countDown() {
+export function countDown(isVoting) {
     let seconds = this.state.seconds - 1;
     this.setState({
         time: secondsToTime(seconds),
@@ -24,6 +23,12 @@ export function countDown() {
     });
     if (seconds === 0) {
         clearInterval(this.timer);
-        this.showEndingAlert()
+        if (isVoting === true) {
+            this.showEndingAlertVoting()
+        } else {
+            this.showEndingAlertDescription()
+        }
+
+
     }
 }

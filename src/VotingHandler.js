@@ -47,6 +47,7 @@ class VotingHandler extends React.Component {
 
         this.state = {
             ukiyoeName: 1,
+            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -62,6 +63,7 @@ class VotingHandler extends React.Component {
 
         this.usedExpression = ["sad_1", "normal", "very_happy"];
 
+        this.state.ukiyoeAllImages.splice(0, 1);
         this.loadDescriptionsForUkiyoe(1)
 
         this.handleSelectedDescription = this.handleSelectedDescription.bind(this);
@@ -91,12 +93,31 @@ class VotingHandler extends React.Component {
     }
 
     updateImages = () => {
-        const nextImage = Math.floor(Math.random() * 20) + 1
-        this.setState(() => ({
-            ukiyoeName: nextImage
-        }));
+        const items = this.state.ukiyoeAllImages
+        console.log(items.length + " | " + items.toString())
 
-        this.loadDescriptionsForUkiyoe(nextImage)
+        if(items.length > 0) {
+            const nextImage = items[Math.floor(Math.random() * items.length)]
+            this.setState(() => ({
+                ukiyoeName: nextImage
+            }));
+
+            const index = items.indexOf(nextImage);
+            items.splice(index, 1);
+
+            this.setState(() => ({
+                ukiyoeAllImages: items
+            }));
+
+            console.log(items.length + " | " + items.toString())
+
+            this.loadDescriptionsForUkiyoe(nextImage)
+        } else {
+            //FINISH!
+            console.log("Finished")
+
+            this.props.onVotingFinished()
+        }
     }
 
     handleEmotionSelector = (event) => {
@@ -118,10 +139,28 @@ class VotingHandler extends React.Component {
     getUkiyoeName = () => this.state.ukiyoeName
     emotionsSelector;
 
-    handleSelectedDescription = () => {
+    handleSelectedDescription = (index) => {
         this.setState(() => ({
             showLoadingIndicator: true
         }));
+
+        const result = this.state.loadedDescriptions[index]
+
+        if (result.numberOfVotes == null) {
+            result['numberOfVotes'] = 0
+        }
+
+        console.log("Selected description: " + result.key + " | " + result.description + " | " + result.numberOfVotes)
+
+        if (this.state.dbEnabled) {
+            db.ref(`descriptions/${result.key}`)
+                .update({
+                    numberOfVotes: result.numberOfVotes + 1
+                })
+                .then(() => {
+                    console.log("Updated information about number of votes for description " + result.key)
+                });
+        }
 
         this.updateImages();
     }
@@ -132,7 +171,6 @@ class VotingHandler extends React.Component {
         }));
 
         this.updateImages();
-        this.playSound();
 
         /*this.setState(() => ({
 
@@ -197,10 +235,20 @@ class VotingHandler extends React.Component {
             const self = this;
             db.ref('descriptions/').orderByChild('imageID').equalTo(imageID).on("value", function (snapshot) {
                 snapshot.forEach(function (data) {
-                    loadedDescriptionsFromFirebase.push(data.val().description)
+                    loadedDescriptionsFromFirebase.push(
+                        {
+                            "key": data.key,
+                            "description": data.val().description,
+                            "numberOfVotes": data.val().numberOfVotes
+                        }
+                    )
                 });
 
-                console.log("Descriptions for image " + imageID + ": " + loadedDescriptionsFromFirebase.toString())
+                console.log("Descriptions for image " + imageID + ": ")
+
+                loadedDescriptionsFromFirebase.forEach(desc => {
+                    console.log(desc.key + " | " + desc.description)
+                })
 
                 self.setState(() => ({
                     loadedDescriptions: loadedDescriptionsFromFirebase,
@@ -223,12 +271,14 @@ class VotingHandler extends React.Component {
                          alt="ukiyoe art"/>
                     <div>
                         <h3>Select the best description for this image:</h3>
-                        {this.state.showLoadingIndicator ? <CircularProgress color="secondary" /> :
+                        {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
                             <Paper style={{maxHeight: 200, overflow: 'auto'}}>
                                 <List component="nav" fullWidth>
                                     {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
-                                        return <ListItem button onClick={self.handleSelectedDescription}>
-                                            <ListItemText primary={object.toString()}/>
+                                        return <ListItem button onClick={() => {
+                                            self.handleSelectedDescription(i)
+                                        }}>
+                                            <ListItemText primary={object.description.toString()}/>
                                         </ListItem>
                                     }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
                                         picture. Just press "Skip" to continue.</Alert>}

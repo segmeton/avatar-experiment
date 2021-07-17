@@ -22,7 +22,7 @@ const isVoting = true
 // experiment time : description(5min=>5*60)
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
 //TODO: normal time for voting stage
-const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 10000000}
+const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 300}
 let currentStateIndex = 0;
 
 class Doc extends React.Component {
@@ -67,7 +67,39 @@ class MainWindow extends React.Component {
         this.setState({time: timeLeftVar});
     }
 
-    showEndingAlert = () => {
+    triggerEndingAlertVoting = () => {
+        this.setState({
+            time: secondsToTime(1),
+            seconds: 1,
+        });
+    }
+
+    showEndingAlertVoting = () => {
+        let bgm = document.getElementById("bgm");
+
+        if (bgm !== undefined) {
+            bgm.pause();
+        }
+
+        //TODO: change this?
+        this.child.showAfterTimer()
+
+        window.onbeforeunload = null;
+
+        if (this.state.dbEnabled) {
+            db.ref(`voting/${this.state.participantID}`)
+                .update({
+                    participant: this.state.participantID,
+                    //TODO
+                    numberOfVotes: 0
+                })
+                .then(() => {
+                    console.log("Updated information about current participant to DB [Voting]")
+                });
+        }
+    }
+
+    showEndingAlertDescription = () => {
         let bgm = document.getElementById("bgm");
 
         if (bgm !== undefined) {
@@ -86,7 +118,7 @@ class MainWindow extends React.Component {
                     finishedSuccessfully: true
                 })
                 .then(() => {
-                    console.log("Updated information about current participant to DB")
+                    console.log("Updated information about current participant to DB [Description]")
                 });
         }
     }
@@ -210,7 +242,7 @@ class MainWindow extends React.Component {
 
     startTimer = () => {
         if (this.timer === 0 && this.state.seconds > 0) {
-            this.timer = setInterval(this.countDown, 1000);
+            this.timer = setInterval(() => {this.countDown(isVoting)}, 1000);
         }
     }
 
@@ -336,7 +368,7 @@ class MainWindow extends React.Component {
                         <VotingHandler
                             selectedGroup={this.state.selectedGroup}
                             participantID={this.state.participantID}
-                            onSkipButtonClicked={this.onSkipButtonClicked}
+                            onVotingFinished={this.triggerEndingAlertVoting}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
