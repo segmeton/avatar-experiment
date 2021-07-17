@@ -50,12 +50,13 @@ export class ShowPasswordAlertDialog extends Component {
                     <DialogTitle id="alert-dialog-title">{"Save your password!"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            This is your password: <b>{this.props.password}</b> Please, save it - you will use it tomorrow during a voting stage.
+                            This is your password: <b>{this.props.password}</b> Please, save it - you will use it tomorrow during a voting stage.<br/>
+                            これはあなたのパスワードです：<b> {this.props.password} </ b> 保存してください-明日の投票ステージで使用します。
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClickClose} color="primary" autoFocus>
-                            Continue
+                            Continue　次へ
                         </Button>
                     </DialogActions>
                 </Dialog>

@@ -48,7 +48,8 @@ export class PasswordAlertDialog extends Component {
                     <DialogTitle id="alert-dialog-title">{"Wrong code"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            Unfortunately, we did not find a participant by this code. Make sure you entered the correct code and try again.
+                            Unfortunately, we did not find a participant by this code. Make sure you entered the correct code and try again.<br/>
+                            残念ながら、このコードでは参加者が見つかりませんでした。 正しいコードを入力したことを確認して、再入力してください。
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

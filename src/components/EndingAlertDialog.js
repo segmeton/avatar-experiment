@@ -41,7 +41,7 @@ export class EndingAlertDialog extends Component {
                 <Dialog fullScreen open={this.state.isEndingDialogOpen} TransitionComponent={Transition}>
                     <header className="header">
                         <div className="header-container">
-                            <h1 className="title">Ending</h1>
+                            <h1 className="title">Ending 終わり</h1>
                         </div>
                     </header>
                     <main className="container">

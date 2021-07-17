@@ -32,15 +32,16 @@ export default function ThankYouCard() {
                 />
                 <CardContent>
                     <Typography gutterBottom variant="h5" component="h2">
-                        Thank you!
+                        Thank you!　ありがとうございます！
                     </Typography>
                     <Typography variant="body2" color="textSecondary" component="p">
-                        Thank you for your participation. Now, please share your feedback with us by filling the form.
+                        Thank you for your participation. Now, please share your feedback with us by filling the questionnaire.<br/>
+                        ご参加ありがとうございます。 調査票に記入して、フィードバックをお寄せください。 
                     </Typography>
                 </CardContent>
             <CardActions>
                 <Button variant="contained" size="small" color="secondary" onClick={onOpenFormButtonClick} fullWidth>
-                    Open the form
+                    Go to questionnaire page 調査票のページへ
                 </Button>
             </CardActions>
         </Card>

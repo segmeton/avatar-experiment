@@ -57,7 +57,7 @@ export default function ConsentCard({onChildClick}) {
                     <EmojiProvider data={emojiData}>
                         <Emoji className="icon-emoji" name="information" width={20}/>
                     </EmojiProvider>
-                    Please fill the questionnaire in the link below before starting the experiment. 
+                    Please fill the consent form in the link below before starting the experiment. <br/>実験を開始する前に、以下のリンクの同意書に記入してください。 
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     {
@@ -83,13 +83,13 @@ export default function ConsentCard({onChildClick}) {
                 <FormControlLabel
                     onMouseDown={event => event.stopPropagation()}
                     control={<Checkbox checked={isCheckboxChecked} onChange={handleCheckboxChange}/>}
-                    label="I agree"
+                    label="I agree　賛成"
                 />
             </CardContent>
             <CardActions>
                 <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
                         onClick={() => onChildClick(selectedLanguage)} fullWidth>
-                    Continue
+                    Continue 次へ
                 </Button>
             </CardActions>
         </Card>

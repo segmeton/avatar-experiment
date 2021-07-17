@@ -37,10 +37,11 @@ export default function WelcomeVotingCard({onStartVotingRoundClick}) {
             />
             <CardContent>
                 <Typography gutterBottom variant="h5" component="h2">
-                    Welcome
+                    Welcome　ようこそ
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    Welcome to the voting stage! Here you will vote for the best descriptions for each image. Please, enter your code to get started!
+                    Welcome to the voting stage! Here you will vote for the best descriptions for each image. Please, enter your code to get started!<br/>
+                    投票ステージへようこそ！ ここでは、各画像の最適な説明に投票します。 開始するには、コードを入力してください。
                 </Typography>
 
                 <ColorInput
@@ -54,7 +55,7 @@ export default function WelcomeVotingCard({onStartVotingRoundClick}) {
             <CardActions>
                 <Button variant="contained" disabled={isButtonEnabled} size="small" color="secondary"
                         onClick={() => onStartVotingRoundClick(participantCode)} fullWidth>
-                    Enter
+                    Start 開始
                 </Button>
             </CardActions>
         </Card>
