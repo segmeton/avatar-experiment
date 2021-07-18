@@ -56,6 +56,7 @@ class Live2DHandler extends React.Component {
 
         this.state = {
             ukiyoeName: 1,
+            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -63,7 +64,8 @@ class Live2DHandler extends React.Component {
             receivedDescription: "",
             session: "describing", // describing || voting
             numberOfReceivedDescriptions: 0,
-            dbEnabled: true
+            dbEnabled: true,
+            descriptionsSkippedInARow: 0
         }
 
         this.timer = 40000; // in ms
@@ -71,6 +73,8 @@ class Live2DHandler extends React.Component {
         this.msgObj = new Message(this.timer);
 
         this.usedExpression = ["disappointed", "sad_1", "normal", "happy", "very_happy"];
+
+        this.state.ukiyoeAllImages.splice(0, 1);
 
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -99,14 +103,33 @@ class Live2DHandler extends React.Component {
     }
 
     updateImages = () => {
+        const items = this.state.ukiyoeAllImages
+        console.log(items.length + " | " + items.toString())
+
+        if(items.length > 0) {
+            const nextImage = items[Math.floor(Math.random() * items.length)]
+            this.setState(() => ({
+                ukiyoeName: nextImage
+            }));
+
+            const index = items.indexOf(nextImage);
+            items.splice(index, 1);
+
+            this.setState(() => ({
+                ukiyoeAllImages: items
+            }));
+
+            console.log(items.length + " | " + items.toString())
+        } else {
+            this.props.onDescriptionsFinished()
+        }
+    }
+
+    /*updateImages = () => {
         this.setState(() => ({
             ukiyoeName: Math.floor(Math.random() * 20) + 1
         }));
-    }
-
-    handleEmotionSelector = (event) => {
-        this.updateEmotion(event.target.value)
-    };
+    }*/
 
     updateEmotion = (value) => {
         this.setState(() => ({
@@ -136,10 +159,15 @@ class Live2DHandler extends React.Component {
         this.updateImages();
         this.props.onSkipButtonClicked()
 
-        // for testing
-        //this.playSound();
+        this.setState(() => ({
+            descriptionsSkippedInARow: this.state.descriptionsSkippedInARow + 1
+        }))
 
-        // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+        console.log("Number of skips: " + this.state.descriptionsSkippedInARow)
+
+        if (this.state.descriptionsSkippedInARow >= 3) {
+            this.updateExpressionState(false);
+        }
     }
 
     handleSubmit = () => {
@@ -152,7 +180,8 @@ class Live2DHandler extends React.Component {
             .push({
                 description: receivedDescription,
                 participantID: this.props.participantID,
-                imageID: this.getUkiyoeName()
+                imageID: this.getUkiyoeName(),
+                date: new Date().toLocaleString()
             }).then(_ => {
                 console.log("Added new description to DB")
             });
@@ -168,7 +197,8 @@ class Live2DHandler extends React.Component {
         this.setState(() => ({
             isSubmitButtonDisabled: true,
             receivedDescription: "",
-            numberOfReceivedDescriptions: numberOfReceivedDescriptions
+            numberOfReceivedDescriptions: numberOfReceivedDescriptions,
+            descriptionsSkippedInARow: 0
         }));
 
         this.props.onDescriptionSubmitted()
@@ -190,7 +220,13 @@ class Live2DHandler extends React.Component {
             if(newIndex <= 2){
                 return this.updateSelectedEmotion(newIndex);
             }
-            return null;
+            //roman code
+            // if(newIndex > 4){
+            //     newIndex = 4;
+            // }
+            // 
+
+            return this.updateSelectedEmotion(newIndex);
         }
 
         let newIndex = this.state.selectedEmotionIndex - 1;
@@ -198,18 +234,6 @@ class Live2DHandler extends React.Component {
             return this.updateSelectedEmotion(newIndex);
         }
         return null;
-
-        // if(this.state.selectedEmotion == "normal") {
-        //      return this.updateEmotion("very_happy");
-        // }
-
-        // if(this.state.selectedEmotion == "very_happy") {
-        //     return this.updateEmotion("sad_2");
-        // }
-
-        // if(this.state.selectedEmotion == "sad_2") {
-        //     return this.updateEmotion("normal");
-        // }         
     }
 
     updateSelectedEmotion = (newIndex) => {

@@ -1,3 +1,5 @@
+//Deployment: https://medium.com/swlh/how-to-deploy-a-react-app-with-firebase-hosting-98063c5bf425
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -12,6 +14,7 @@ import ConsentCard from "./components/ConsentCard";
 import WelcomeVotingCard from "./components/WelcomeVotingCard";
 import {PasswordAlertDialog} from "./components/PasswordAlertDialog";
 import ShowPasswordAlertDialog from "./components/ShowPasswordAlertDialog";
+import VotingHandler from "./VotingHandler";
 
 const currentDate = new Date().toLocaleDateString();
 
@@ -20,7 +23,7 @@ const isVoting = false
 
 // experiment time : description(5min=>5*60)
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
-const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 100}
+const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 300}
 let currentStateIndex = 0;
 
 class Doc extends React.Component {
@@ -65,7 +68,38 @@ class MainWindow extends React.Component {
         this.setState({time: timeLeftVar});
     }
 
-    showEndingAlert = () => {
+    triggerEndingAlert = () => {
+        this.setState({
+            time: secondsToTime(1),
+            seconds: 1,
+        });
+    }
+
+    showEndingAlertVoting = () => {
+        let bgm = document.getElementById("bgm");
+
+        if (bgm !== undefined) {
+            bgm.pause();
+        }
+
+        //TODO: change this?
+        this.child.showAfterTimer()
+
+        window.onbeforeunload = null;
+
+        /*if (this.state.dbEnabled) {
+            db.ref(`voting/${this.state.participantID}`)
+                .update({
+                    participant: this.state.participantID,
+                    numberOfVotes: 0
+                })
+                .then(() => {
+                    console.log("Updated information about current participant to DB [Voting]")
+                });
+        }*/
+    }
+
+    showEndingAlertDescription = () => {
         let bgm = document.getElementById("bgm");
 
         if (bgm !== undefined) {
@@ -81,10 +115,11 @@ class MainWindow extends React.Component {
                 .update({
                     totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
                     totalNumberOfSkipped: this.state.totalNumberOfSkipped,
-                    finishedSuccessfully: true
+                    finishedSuccessfully: true,
+                    date: new Date().toLocaleString()
                 })
                 .then(() => {
-                    console.log("Updated information about current participant to DB")
+                    console.log("Updated information about current participant to DB [Description]")
                 });
         }
     }
@@ -135,7 +170,6 @@ class MainWindow extends React.Component {
             let receivedParticipantName = "_";
             const self = this;
             db.ref('participants/').orderByChild('password').equalTo(participantCode).on("value", function (snapshot) {
-
                 snapshot.forEach(function (data) {
                     receivedParticipantID = data.val().participantID
                     receivedParticipantName = data.val().participantName
@@ -194,7 +228,6 @@ class MainWindow extends React.Component {
     }
 
     onSkipButtonClicked = () => {
-        console.log("Skip! clicked in child")
         this.setState({
             totalNumberOfSkipped: this.state.totalNumberOfSkipped + 1
         })
@@ -208,7 +241,7 @@ class MainWindow extends React.Component {
 
     startTimer = () => {
         if (this.timer === 0 && this.state.seconds > 0) {
-            this.timer = setInterval(this.countDown, 1000);
+            this.timer = setInterval(() => {this.countDown(isVoting)}, 1000);
         }
     }
 
@@ -288,6 +321,7 @@ class MainWindow extends React.Component {
                             participantID={this.state.participantID}
                             onSkipButtonClicked={this.onSkipButtonClicked}
                             onDescriptionSubmitted={this.onDescriptionSubmitted}
+                            onDescriptionsFinished={this.triggerEndingAlert}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
@@ -318,7 +352,33 @@ class MainWindow extends React.Component {
                 </footer>
             </React.StrictMode>)
         } else if (this.state.stage === gameStages[5]) { //VOTING STAGE
-            return "VOTING"
+            this.startTimer()
+
+            let stringTime = this.getStringTime(this.state.time);
+
+            return (
+                <React.StrictMode>
+                    <Doc/>
+                    <header className="header">
+                        <div className="header-container">
+                            {<h1 className="title">Voting session: {stringTime}</h1>}
+                        </div>
+                    </header>
+                    <main className="container">
+                        <VotingHandler
+                            selectedGroup={this.state.selectedGroup}
+                            participantID={this.state.participantID}
+                            onVotingFinished={this.triggerEndingAlert}
+                        />
+                        <EndingAlertDialog onRef={ref => (this.child = ref)}/>
+                    </main>
+                    <footer>
+                        <div className="footer-container">
+                            <span>Ritsumeikan University - Intelligent Computer Entertainment Lab</span>
+                        </div>
+                    </footer>
+                </React.StrictMode>
+            )
         }
 
         return "THE END. THANK YOU"
