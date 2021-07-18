@@ -3,37 +3,37 @@ import Dialog from '@material-ui/core/Dialog';
 import {DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 
-export class PasswordAlertDialog extends Component {
+export class ShowUsedUsernameAlert extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            isPasswordDialogOpened: false
+            isDialogOpened: false
         };
     }
 
     componentDidMount() {
-        this.props.onRefPass(this)
+        this.props.onRef(this)
     }
 
     componentWillUnmount() {
-        this.props.onRefPass(undefined)
+        this.props.onRef(undefined)
     }
 
-    openPasswordAlertDialog() {
+    openUsedUsernameDialog() {
         this.handleClickOpen()
     }
 
     handleClickOpen = () => {
         this.setState(() => ({
-            isPasswordDialogOpened: true
+            isDialogOpened: true
         }));
     };
 
     handleClickClose = () => {
         this.setState(() => ({
-            isPasswordDialogOpened: false
+            isDialogOpened: false
         }));
     }
 
@@ -41,15 +41,14 @@ export class PasswordAlertDialog extends Component {
         return (
             <div>
                 <Dialog
-                    open={this.state.isPasswordDialogOpened}
+                    open={this.state.isDialogOpened}
                     aria-labelledby="alert-dialog-title"
                     aria-describedby="alert-dialog-description"
                 >
-                    <DialogTitle id="alert-dialog-title">{"Wrong code"}</DialogTitle>
+                    <DialogTitle id="alert-dialog-title">Occupied username</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            Unfortunately, we did not find a participant by this code. Make sure you entered the correct code and try again.<br/>
-                            残念ながら、このコードでは参加者が見つかりませんでした。 正しいコードを入力したことを確認して、再入力してください。
+                            Sorry, participant with this username already exists. Please, select a different username.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -63,4 +62,4 @@ export class PasswordAlertDialog extends Component {
     }
 }
 
-export default PasswordAlertDialog;
+export default ShowUsedUsernameAlert;
