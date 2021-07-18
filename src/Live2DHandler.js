@@ -102,7 +102,7 @@ class Live2DHandler extends React.Component {
         window.onbeforeunload = null;
     }
 
-    updateImages = () => {
+    updateImages = (isSubmit) => {
         const items = this.state.ukiyoeAllImages
         console.log(items.length + " | " + items.toString())
 
@@ -112,13 +112,14 @@ class Live2DHandler extends React.Component {
                 ukiyoeName: nextImage
             }));
 
-            const index = items.indexOf(nextImage);
-            items.splice(index, 1);
-
-            this.setState(() => ({
-                ukiyoeAllImages: items
-            }));
-
+            if(isSubmit){
+                const index = items.indexOf(nextImage);
+                items.splice(index, 1);
+                this.setState(() => ({
+                    ukiyoeAllImages: items
+                }));
+            }
+            
             console.log(items.length + " | " + items.toString())
         } else {
             this.props.onDescriptionsFinished()
@@ -156,7 +157,7 @@ class Live2DHandler extends React.Component {
     emotionsSelector;
 
     handleSkip() {
-        this.updateImages();
+        this.updateImages(false);
         this.props.onSkipButtonClicked()
 
         this.setState(() => ({
@@ -188,7 +189,7 @@ class Live2DHandler extends React.Component {
         }
 
 
-        this.updateImages();
+        this.updateImages(true);
 
         this.playSound();
 
