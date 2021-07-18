@@ -138,7 +138,8 @@ class VotingHandler extends React.Component {
 
     handleSelectedDescription = (index) => {
         this.setState(() => ({
-            showLoadingIndicator: true
+            showLoadingIndicator: true,
+            descriptionsSkippedInARow: 0
         }));
 
         const result = this.state.loadedDescriptions[index]

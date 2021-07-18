@@ -243,11 +243,11 @@ class Live2DHandler extends React.Component {
         
         let newEmotion = 2;
        
-        if(newIndex == 2){
+        if(newIndex === 2){
             newEmotion = Math.floor(Math.random() * 2) + 3;
         }
 
-        if(newIndex == 0){
+        if(newIndex === 0){
             newEmotion = Math.floor(Math.random() * 2);
         }
 
