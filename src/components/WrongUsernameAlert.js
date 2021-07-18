@@ -3,60 +3,57 @@ import Dialog from '@material-ui/core/Dialog';
 import {DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 
-export class ShowPasswordAlertDialog extends Component {
+export class WrongUsernameAlert extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            isPasswordDialogOpened: false
+            isDialogOpened: false
         };
     }
 
     componentDidMount() {
-        this.props.onRef(this)
+        this.props.onRefPass(this)
     }
 
     componentWillUnmount() {
-        this.props.onRef(undefined)
+        this.props.onRefPass(undefined)
     }
 
-    openShowGeneratedPasswordAlertDialog() {
+    openWrongUsernameAlert() {
         this.handleClickOpen()
     }
 
     handleClickOpen = () => {
         this.setState(() => ({
-            isPasswordDialogOpened: true
+            isDialogOpened: true
         }));
     };
 
     handleClickClose = () => {
         this.setState(() => ({
-            isPasswordDialogOpened: false
+            isDialogOpened: false
         }));
-
-        this.props.startDescriptionRound()
     }
 
     render() {
         return (
             <div>
                 <Dialog
-                    open={this.state.isPasswordDialogOpened}
+                    open={this.state.isDialogOpened}
                     aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <DialogTitle id="alert-dialog-title">{"Save your password!"}</DialogTitle>
+                    aria-describedby="alert-dialog-description">
+                    <DialogTitle id="alert-dialog-title">Wrong username</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            This is your password: <b>{this.props.password}</b> Please, save it - you will use it tomorrow during a voting stage.<br/>
-                            これはあなたのパスワードです：<b> {this.props.password} </ b> 保存してください-明日の投票ステージで使用します。
+                            Unfortunately, we did not find a participant by this username. Make sure you entered the correct username and try again.<br/>
+                            残念ながら、このコードでは参加者が見つかりませんでした。 正しいコードを入力したことを確認して、再入力してください。
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClickClose} color="primary" autoFocus>
-                            Continue　次へ
+                            OK
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -65,4 +62,4 @@ export class ShowPasswordAlertDialog extends Component {
     }
 }
 
-export default ShowPasswordAlertDialog;
+export default WrongUsernameAlert;

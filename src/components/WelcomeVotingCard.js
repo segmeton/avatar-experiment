@@ -40,14 +40,14 @@ export default function WelcomeVotingCard({onStartVotingRoundClick}) {
                     Welcome　ようこそ
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    Welcome to the voting stage! Here you will vote for the best descriptions for each image. Please, enter your code to get started!<br/>
+                    Welcome to the voting stage! Here you will vote for the best descriptions for each image. Please, enter your username to get started!<br/>
                     投票ステージへようこそ！ ここでは、各画像の最適な説明に投票します。 開始するには、コードを入力してください。
                 </Typography>
 
                 <ColorInput
                     margin="none"
                     fullWidth
-                    label="Your personal code"
+                    label="Your username"
                     variant="outlined"
                     onChange={handleCodeInput}
                 />

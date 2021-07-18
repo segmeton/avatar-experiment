@@ -1,4 +1,7 @@
 //Deployment: https://medium.com/swlh/how-to-deploy-a-react-app-with-firebase-hosting-98063c5bf425
+//BUILD
+//1. npm run-scrip build
+//2. firebase deploy
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -12,8 +15,8 @@ import {db} from "./database/firebase";
 import {v4 as uuidv4} from 'uuid';
 import ConsentCard from "./components/ConsentCard";
 import WelcomeVotingCard from "./components/WelcomeVotingCard";
-import {PasswordAlertDialog} from "./components/PasswordAlertDialog";
-import ShowPasswordAlertDialog from "./components/ShowPasswordAlertDialog";
+import {WrongUsernameAlert} from "./components/WrongUsernameAlert";
+import ShowUsedUsernameAlert from "./components/ShowUsedUsernameAlert";
 import VotingHandler from "./VotingHandler";
 
 const currentDate = new Date().toLocaleDateString();
@@ -59,8 +62,7 @@ class MainWindow extends React.Component {
         this.countDown = countDown.bind(this);
 
         this.changeState = this.changeState.bind(this);
-        this.startDescriptionRound = this.startDescriptionRound.bind(this);
-        this.prepareForDescriptionRound = this.prepareForDescriptionRound.bind(this);
+        this.checkIfUsernameUnique = this.checkIfUsernameUnique.bind(this);
     }
 
     componentDidMount() {
@@ -157,27 +159,19 @@ class MainWindow extends React.Component {
         console.log("Selected group: " + event.target.value)
     }
 
-    startVotingRound = (participantCode) => {
-        /*if (this.state.dbEnabled) {
-            db.ref('descriptions/').orderByChild('imageID').equalTo(1).on("value", function (snapshot) {
-                snapshot.forEach(function (data) {
-                    console.log(data.val().description)
-                });
-            });
-        }*/
+    startVotingRound = (username) => {
         if (this.state.dbEnabled) {
             let receivedParticipantID = "0";
             let receivedParticipantName = "_";
             const self = this;
-            db.ref('participants/').orderByChild('password').equalTo(participantCode).on("value", function (snapshot) {
+            db.ref('participants/').orderByChild('participantName').equalTo(username).on("value", function (snapshot) {
                 snapshot.forEach(function (data) {
                     receivedParticipantID = data.val().participantID
                     receivedParticipantName = data.val().participantName
 
                     self.setState({
                         participantName: receivedParticipantName,
-                        participantID: receivedParticipantID,
-                        password: participantCode
+                        participantID: receivedParticipantID
                     });
                 });
 
@@ -185,11 +179,23 @@ class MainWindow extends React.Component {
                     console.log("Participant ID: " + receivedParticipantID + ", name: " + receivedParticipantName)
                     self.changeState(5)
                 } else {
-                    self.child.openPasswordAlertDialog()
-                    console.log("error, wrong password")
+                    self.child.openWrongUsernameAlert()
+                    console.log("error, wrong username")
                 }
             })
         }
+    }
+
+    checkIfUsernameUnique = (username) => {
+        const self = this
+        db.ref('participants/').orderByChild('participantName').equalTo(username).on("value", function (snapshot) {
+
+            if (snapshot.numChildren() > 0) {
+                self.child.openUsedUsernameDialog()
+            } else {
+                self.prepareForDescriptionRound(username)
+            }
+        })
     }
 
     prepareForDescriptionRound = (participantName) => {
@@ -218,9 +224,10 @@ class MainWindow extends React.Component {
                 })
                 .then(() => {
                     console.log("Added new participant to DB: " + this.state.password)
-                    this.child.openShowGeneratedPasswordAlertDialog()
                 });
         }
+
+        this.startDescriptionRound()
     }
 
     startDescriptionRound = () => {
@@ -287,12 +294,10 @@ class MainWindow extends React.Component {
                 </header>
                 <main className="container">
                     <WelcomeCard
-                        onStartDescriptionRoundClick={this.prepareForDescriptionRound.bind(this)}
+                        onStartDescriptionRoundClick={this.checkIfUsernameUnique.bind(this)}
                         onGroupSelected={this.onGroupSelected.bind(this)}/>
-                    <ShowPasswordAlertDialog
+                    <ShowUsedUsernameAlert
                         onRef={ref => (this.child = ref)}
-                        password={this.state.password}
-                        startDescriptionRound={this.startDescriptionRound.bind(this)}
                     />
                 </main>
                 <footer>
@@ -343,7 +348,7 @@ class MainWindow extends React.Component {
                 <main className="container">
                     <WelcomeVotingCard
                         onStartVotingRoundClick={this.startVotingRound.bind(this)}/>
-                    <PasswordAlertDialog onRefPass={ref => (this.child = ref)}/>
+                    <WrongUsernameAlert onRefPass={ref => (this.child = ref)}/>
                 </main>
                 <footer>
                     <div className="footer-container">
