@@ -10,7 +10,7 @@ import {ColorInput} from "../Live2DHandler";
 
 const useStyles = makeStyles({
     root: {
-        maxWidth: 345,
+        maxWidth: 500,
     },
 });
 
