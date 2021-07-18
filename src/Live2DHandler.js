@@ -55,7 +55,7 @@ class Live2DHandler extends React.Component {
         super(props);
 
         this.state = {
-            ukiyoeName: 1,
+            ukiyoeName: Math.floor(Math.random() * 20) + 1,
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
@@ -68,13 +68,13 @@ class Live2DHandler extends React.Component {
             descriptionsSkippedInARow: 0
         }
 
-        this.timer = 40000; // in ms
+        this.timer = 26667; // in ms
 
         this.msgObj = new Message(this.timer);
 
         this.usedExpression = ["disappointed", "sad_1", "normal", "happy", "very_happy"];
 
-        this.state.ukiyoeAllImages.splice(0, 1);
+        // this.state.ukiyoeAllImages.splice(0, 1);
 
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -106,19 +106,20 @@ class Live2DHandler extends React.Component {
         const items = this.state.ukiyoeAllImages
         console.log(items.length + " | " + items.toString())
 
+        if(isSubmit){
+            const index = items.indexOf(this.state.ukiyoeName);
+            items.splice(index, 1);
+            this.setState(() => ({
+                ukiyoeAllImages: items
+            }));
+        }
+        
         if(items.length > 0) {
+                
             const nextImage = items[Math.floor(Math.random() * items.length)]
             this.setState(() => ({
                 ukiyoeName: nextImage
             }));
-
-            if(isSubmit){
-                const index = items.indexOf(nextImage);
-                items.splice(index, 1);
-                this.setState(() => ({
-                    ukiyoeAllImages: items
-                }));
-            }
             
             console.log(items.length + " | " + items.toString())
         } else {

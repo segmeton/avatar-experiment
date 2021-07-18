@@ -46,7 +46,7 @@ class VotingHandler extends React.Component {
         super(props);
 
         this.state = {
-            ukiyoeName: 1,
+            ukiyoeName: Math.floor(Math.random() * 20) + 1,
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
@@ -58,7 +58,7 @@ class VotingHandler extends React.Component {
             descriptionsSkippedInARow: 0
         }
 
-        this.timer = 40000; // in ms
+        this.timer = 10000; // in ms
 
         this.msgObj = new Message(this.timer);
 
@@ -93,21 +93,23 @@ class VotingHandler extends React.Component {
         window.onbeforeunload = null;
     }
 
-    updateImages = () => {
+    updateImages = (isSubmit) => {
         const items = this.state.ukiyoeAllImages
         console.log(items.length + " | " + items.toString())
+
+        if(isSubmit){
+            const index = items.indexOf(this.state.ukiyoeName);
+            items.splice(index, 1);
+
+            this.setState(() => ({
+                ukiyoeAllImages: items
+            }));
+        }
 
         if(items.length > 0) {
             const nextImage = items[Math.floor(Math.random() * items.length)]
             this.setState(() => ({
                 ukiyoeName: nextImage
-            }));
-
-            const index = items.indexOf(nextImage);
-            items.splice(index, 1);
-
-            this.setState(() => ({
-                ukiyoeAllImages: items
             }));
 
             console.log(items.length + " | " + items.toString())
@@ -159,7 +161,7 @@ class VotingHandler extends React.Component {
                 });
         }
 
-        this.updateImages();
+        this.updateImages(true);
 
         this.updateExpressionState(true);
         this.playSound();
@@ -171,7 +173,7 @@ class VotingHandler extends React.Component {
             descriptionsSkippedInARow: this.state.descriptionsSkippedInARow + 1
         }));
 
-        this.updateImages();
+        this.updateImages(false);
 
         console.log("Number of skips: " + this.state.descriptionsSkippedInARow)
 
