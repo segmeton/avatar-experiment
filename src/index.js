@@ -265,7 +265,7 @@ class MainWindow extends React.Component {
                 <Doc/>
                 <header className="header">
                     <div className="header-container">
-                        <h1 className="title">Important</h1>
+                        <h1 className="title">Important　重要</h1>
                     </div>
                 </header>
                 <main className="container">
@@ -282,7 +282,7 @@ class MainWindow extends React.Component {
                 <Doc/>
                 <header className="header">
                     <div className="header-container">
-                        <h1 className="title">Welcome</h1>
+                        <h1 className="title">Welcome ようこそ</h1>
                     </div>
                 </header>
                 <main className="container">
@@ -311,7 +311,7 @@ class MainWindow extends React.Component {
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Describing session: {stringTime}</h1>}
+                            {<h1 className="title">Describing session (記述セッション): {stringTime}</h1>}
                         </div>
                     </header>
                     {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
@@ -361,7 +361,7 @@ class MainWindow extends React.Component {
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Voting session: {stringTime}</h1>}
+                            {<h1 className="title">Voting session (投票セッション): {stringTime}</h1>}
                         </div>
                     </header>
                     <main className="container">

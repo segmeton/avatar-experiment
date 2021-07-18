@@ -12,7 +12,7 @@ import emojiData from 'react-apple-emojis/lib/data.json'
 
 const useStyles = makeStyles(() => ({
     root: {
-        maxWidth: 345,
+        maxWidth: 500,
     },
 }));
 
@@ -32,6 +32,8 @@ export default function ConsentCard({onChildClick}) {
         setSelectedLanguage(event.target.value)
         console.log("Selected language: " + event.target.value)
     }
+
+    let agreeString = "I have checked \"Agree (同意する) \" and added my contact information in the above SurveyMonkey page. (前記のSurveyMonkeyのページに「Agree (同意する) 」にチェックを入れ、連絡先情報を追加しました。)";
 
     return (
         <Card className={classes.root}>
@@ -77,7 +79,7 @@ export default function ConsentCard({onChildClick}) {
                 <FormControlLabel
                     onMouseDown={event => event.stopPropagation()}
                     control={<Checkbox checked={isCheckboxChecked} onChange={handleCheckboxChange}/>}
-                    label="I agree　賛成"
+                    label={agreeString}
                 />
             </CardContent>
             <CardActions>
