@@ -55,8 +55,8 @@ class Live2DHandler extends React.Component {
         super(props);
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 20) + 1,
-            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
+            ukiyoeName: Math.floor(Math.random() * 40) + 1,
+            ukiyoeAllImages: Array.from({length: 40}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -313,7 +313,7 @@ class Live2DHandler extends React.Component {
                             value={this.state.receivedDescription}
                             fullWidth
                             id="outlined-basic"
-                            label="Your description"
+                            label="Describe the image as concise as possible here (ここで画像をできるだけ簡潔に説明してください)"
                             variant="outlined"
                             onChange={this.handleDescriptionInput}/>
                         <ColorButton

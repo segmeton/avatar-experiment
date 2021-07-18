@@ -46,8 +46,8 @@ class VotingHandler extends React.Component {
         super(props);
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 20) + 1,
-            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
+            ukiyoeName: Math.floor(Math.random() * 40) + 1,
+            ukiyoeAllImages: Array.from({length: 40}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -282,7 +282,7 @@ class VotingHandler extends React.Component {
                          src={require(`./img/ukiyoe/${ukiyoeName}.jpg`).default}
                          alt="ukiyoe art"/>
                     <div>
-                        <h3>Select the best description for this image:</h3>
+                        <h3>Select the best description for this image (この画像に最適な説明を選択してください) :</h3>
                         {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
                             <Paper style={{maxHeight: 200, overflow: 'auto'}}>
                                 <List component="nav" fullWidth>
@@ -293,7 +293,7 @@ class VotingHandler extends React.Component {
                                             <ListItemText primary={object.description.toString()}/>
                                         </ListItem>
                                     }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
-                                        picture. Just press "Skip" to continue.</Alert>}
+                                        picture. Just press "Skip" to continue. (この写真の説明はありません。 「スキップ」を押すだけで続行できます。)</Alert>}
                                 </List>
                             </Paper>}
                         <SkipButton
