@@ -41,7 +41,7 @@ export default function WelcomeVotingCard({onStartVotingRoundClick}) {
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     Welcome to the voting stage! Here you will vote for the best descriptions for each image. Please, enter your username to get started!<br/>
-                    投票ステージへようこそ！ ここでは、各画像の最適な説明に投票します。 開始するには、コードを入力してください。
+                    投票ステージへようこそ！ ここでは、各画像の最適な説明に投票します。 開始するには、ユーザー名を入力してください。
                 </Typography>
 
                 <ColorInput
