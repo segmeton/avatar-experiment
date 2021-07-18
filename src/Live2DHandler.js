@@ -203,7 +203,7 @@ class Live2DHandler extends React.Component {
             descriptionsSkippedInARow: 0
         }));
 
-        this.props.onDescriptionSubmitted()
+        this.props.onDescriptionSubmitted(this.state.ukiyoeAllImages.length)
 
         this.updateExpressionState(true);
 
@@ -323,7 +323,7 @@ class Live2DHandler extends React.Component {
                             onClick={() => {
                                 this.handleSubmit()
                             }}>
-                            Submit description
+                            Submit 送信
                         </ColorButton>
                         <SkipButton
                             variant="outlined"
@@ -331,7 +331,7 @@ class Live2DHandler extends React.Component {
                             onClick={() => {
                                 this.handleSkip()
                             }}>
-                            Skip
+                            Skip スキップ
                         </SkipButton>
                     </div>
                     <div>

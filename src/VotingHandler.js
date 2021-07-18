@@ -164,6 +164,8 @@ class VotingHandler extends React.Component {
 
         this.updateImages(true);
 
+        this.props.onVoteSubmitted(this.state.ukiyoeAllImages.length)
+
         this.updateExpressionState(true);
         this.playSound();
     }
@@ -282,7 +284,8 @@ class VotingHandler extends React.Component {
                          src={require(`./img/ukiyoe/${ukiyoeName}.jpg`).default}
                          alt="ukiyoe art"/>
                     <div>
-                        <h3>Select the best description for this image (この画像に最適な説明を選択してください) :</h3>
+                        <h3>Select the best description for this image (この画像に最適な説明を選択してください)</h3>
+                        <span>Click on the description to vote. (説明をクリックして投票してください。)</span>
                         {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
                             <Paper style={{maxHeight: 200, overflow: 'auto'}}>
                                 <List component="nav" fullWidth>
@@ -302,7 +305,7 @@ class VotingHandler extends React.Component {
                             onClick={() => {
                                 this.handleSkip()
                             }}>
-                            Skip
+                            Skip スキップ
                         </SkipButton>
                     </div>
                     <div>

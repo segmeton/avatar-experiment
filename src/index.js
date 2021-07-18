@@ -22,9 +22,9 @@ import VotingHandler from "./VotingHandler";
 const currentDate = new Date().toLocaleDateString();
 
 //CHANGE THIS FOR VOTING
-const isVoting = false
+const isVoting = true;
 
-// experiment time : description(5min=>5*60)
+// experiment time : description(5min=>5*60)    
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
 const gameStagesDurations = {consent: 0, welcome: 0, description: 300, results: 0, voting: 300}
 let currentStateIndex = 0;
@@ -49,12 +49,15 @@ class MainWindow extends React.Component {
             participantID: "0",
             totalNumberOfDescriptions: 0,
             totalNumberOfSkipped: 0,
+            totalNumberOfVotes: 0,
+            totalNumberOfSkippedVotes: 0,
             language: "English", // English || 日本語
             isAgreeToConsent: false,
             dbEnabled: true,
             selectedGroup: "group_emotions",
             password: "",
-            session: "Describing"
+            session: "Describing",
+            imageLeft: 40
         };
 
         this.timer = 0;
@@ -113,7 +116,19 @@ class MainWindow extends React.Component {
         window.onbeforeunload = null;
 
         if (this.state.dbEnabled) {
-            db.ref(`participants/${this.state.participantID}`)
+            if(isVoting){
+                db.ref(`participants/${this.state.participantID}`)
+                .update({
+                    totalNumberOfDescriptions: this.state.totalNumberOfVotes,
+                    totalNumberOfSkipped: this.state.totalNumberOfSkippedVotes,
+                    finishedVoteSuccessfully: true,
+                    date: new Date().toLocaleString()
+                })
+                .then(() => {
+                    console.log("Updated information about current participant to DB [Description]")
+                });
+            }else{
+                db.ref(`participants/${this.state.participantID}`)
                 .update({
                     totalNumberOfDescriptions: this.state.totalNumberOfDescriptions,
                     totalNumberOfSkipped: this.state.totalNumberOfSkipped,
@@ -123,6 +138,7 @@ class MainWindow extends React.Component {
                 .then(() => {
                     console.log("Updated information about current participant to DB [Description]")
                 });
+            }
         }
     }
 
@@ -217,6 +233,7 @@ class MainWindow extends React.Component {
                     participantName,
                     participantID: uuid,
                     finishedSuccessfully: false,
+                    finishedVoteSuccessfully: false,
                     language: this.state.language,
                     isAgreeToConsent: this.state.isAgreeToConsent,
                     group: this.state.selectedGroup,
@@ -240,9 +257,17 @@ class MainWindow extends React.Component {
         })
     }
 
-    onDescriptionSubmitted = () => {
+    onDescriptionSubmitted = (imageLeft) => {
         this.setState({
-            totalNumberOfDescriptions: this.state.totalNumberOfDescriptions + 1
+            totalNumberOfDescriptions: this.state.totalNumberOfDescriptions + 1,
+            imageLeft: imageLeft
+        })
+    }
+
+    onVoteSubmitted = (imageLeft) => {
+        this.setState({
+            totalNumberOfVotes: this.state.totalNumberOfVotes + 1,
+            imageLeft: imageLeft
         })
     }
 
@@ -316,7 +341,7 @@ class MainWindow extends React.Component {
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Describing session (記述セッション): {stringTime}</h1>}
+                            {<h1 className="title">Describing session (記述セッション): {stringTime} - {this.state.imageLeft} images left (残り{this.state.imageLeft}イメージ)</h1>}
                         </div>
                     </header>
                     {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
@@ -366,13 +391,14 @@ class MainWindow extends React.Component {
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Voting session (投票セッション): {stringTime}</h1>}
+                            {<h1 className="title">Voting session (投票セッション): {stringTime} - {this.state.imageLeft} images left (残り{this.state.imageLeft}イメージ)</h1>}
                         </div>
                     </header>
                     <main className="container">
                         <VotingHandler
                             selectedGroup={this.state.selectedGroup}
                             participantID={this.state.participantID}
+                            onVoteSubmitted={this.onVoteSubmitted}
                             onVotingFinished={this.triggerEndingAlert}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
