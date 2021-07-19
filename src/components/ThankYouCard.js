@@ -7,6 +7,9 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
+//CHANGE THIS FOR VOTING
+const isVoting = true;
+
 const useStyles = makeStyles({
     root: {
         maxWidth: 345,
@@ -16,8 +19,14 @@ const useStyles = makeStyles({
 export default function ThankYouCard() {
     const classes = useStyles();
 
-     const onOpenFormButtonClick = () => {
-        window.open("https://www.surveymonkey.com/r/VLQ6MGF","_self")
+    const onOpenFormButtonClick = () => {
+        let url = "";
+        if(isVoting){
+            url = "https://www.surveymonkey.com/r/C3KQSMR"
+        }else{
+            url = "https://www.surveymonkey.com/r/VLQ6MGF"
+        }
+        window.open(url,"_self")
     }
 
     return (
