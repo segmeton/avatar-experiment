@@ -51,7 +51,7 @@ class VotingHandler extends React.Component {
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
-            session: "voting", // describing || votin
+            session: "voting", // describing || voting
             dbEnabled: true,
             loadedDescriptions: [],
             showLoadingIndicator: true,
@@ -203,11 +203,34 @@ class VotingHandler extends React.Component {
         // 0 : negative
         // 1 : neutral
         // 2 : positive
+        // if(isUp){
+        //     let newIndex = this.state.selectedEmotionIndex + 1;
+        //     if(newIndex > 4){
+        //         newIndex = 4;
+        //     }
+        //     return this.updateSelectedEmotion(newIndex);
+        // }
+
+        // let newIndex = this.state.selectedEmotionIndex - 1;
+        // if(newIndex >= 0){
+        //     return this.updateSelectedEmotion(newIndex);
+        // }
+        // return null;
+
         if(isUp){
             let newIndex = this.state.selectedEmotionIndex + 1;
-            if(newIndex > 4){
-                newIndex = 4;
+            if(newIndex > 2){
+                newIndex = 2;
             }
+            if(newIndex <= 2){
+                return this.updateSelectedEmotion(newIndex);
+            }
+            //roman code
+            // if(newIndex > 4){
+            //     newIndex = 4;
+            // }
+            // 
+
             return this.updateSelectedEmotion(newIndex);
         }
 
@@ -219,10 +242,26 @@ class VotingHandler extends React.Component {
     }
 
     updateSelectedEmotion = (newIndex) => {
-        this.updateEmotion(this.usedExpression[newIndex]);
+        // this.updateEmotion(this.usedExpression[newIndex]);
+        // this.setState(() => ({
+        //     selectedEmotionIndex: newIndex
+        // }));
+
         this.setState(() => ({
             selectedEmotionIndex: newIndex
         }));
+        
+        let newEmotion = 2;
+       
+        if(newIndex === 2){
+            newEmotion = Math.floor(Math.random() * 2) + 3;
+        }
+
+        if(newIndex === 0){
+            newEmotion = Math.floor(Math.random() * 2);
+        }
+
+        this.updateEmotion(this.usedExpression[newEmotion]);
     }
 
     playSound = () => {
@@ -284,8 +323,8 @@ class VotingHandler extends React.Component {
                          src={require(`./img/ukiyoe/${ukiyoeName}.jpg`).default}
                          alt="ukiyoe art"/>
                     <div>
-                        <h3>Select the best description for this image (この画像に最適な説明を選択してください)</h3>
-                        <span>Click on the description to vote. (説明をクリックして投票してください。)</span>
+                        <h3>Select the best description for this image. (この画像に最も良い説明文を選択してください。)</h3>
+                        <span>Click on the description to vote. (説明文をクリックして投票してください。)</span>
                         {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
                             <Paper style={{maxHeight: 200, overflow: 'auto'}}>
                                 <List component="nav" fullWidth>
