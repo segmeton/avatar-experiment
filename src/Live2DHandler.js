@@ -55,8 +55,8 @@ class Live2DHandler extends React.Component {
         super(props);
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 40) + 1,
-            ukiyoeAllImages: Array.from({length: 40}, (_, i) => i + 1),
+            ukiyoeName: Math.floor(Math.random() * 20) + 1,
+            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -295,7 +295,7 @@ class Live2DHandler extends React.Component {
             <div className="row">
                 <div className="column col-6">
                     <div className="row">
-                        <img className="ukiyoe-responsive" src={require(`./img/ukiyoe/${ukiyoeName}.jpg`).default}
+                        <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeName}.jpg`).default}
                              alt="ukiyoe art"/>
                     </div>
                     <div className="row">

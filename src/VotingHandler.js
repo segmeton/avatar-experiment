@@ -46,8 +46,8 @@ class VotingHandler extends React.Component {
         super(props);
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 40) + 1,
-            ukiyoeAllImages: Array.from({length: 40}, (_, i) => i + 1),
+            ukiyoeName: Math.floor(Math.random() * 20) + 1,
+            ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -320,7 +320,7 @@ class VotingHandler extends React.Component {
             <div className="row-voting">
                 <div className="column topPane">
                     <img className="ukiyoe-responsive-voting"
-                         src={require(`./img/ukiyoe/${ukiyoeName}.jpg`).default}
+                         src={require(`./img/justin/${ukiyoeName}.jpg`).default}
                          alt="ukiyoe art"/>
                     <div>
                         <h3>Select the best description for this image. (この画像に最も良い説明文を選択してください。)</h3>
