@@ -3,6 +3,7 @@ import {Button, TextField, withStyles} from "@material-ui/core";
 import {lightBlue} from "@material-ui/core/colors";
 import thank_you_f from "./audio/thank_you_f.mp3";
 import Message from "./utils/Message";
+import Round from "./utils/Round";
 import {db} from "./database/firebase";
 
 const ColorButton = withStyles(() => ({
@@ -60,7 +61,7 @@ class Live2DHandler extends React.Component {
         this.state = {
             ukiyoeName: Math.floor(Math.random() * 20) + 1,
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
-            ukiyoeName: 1,
+            ukiyoeName: sets[0][0],
             ukiyoeAllImageSets: sets,
             play: false,
             selectedEmotion: "normal",
@@ -69,14 +70,20 @@ class Live2DHandler extends React.Component {
             receivedDescription: "",
             session: "describing", // describing || voting
             numberOfReceivedDescriptions: 0,
-            dbEnabled: true,
-            descriptionsSkippedInARow: 0
+            dbEnabled: false,
+            descriptionsSkippedInARow: 0,
+            currentRound: 1,
+            maxRound: 5
         }
 
 
         this.timer = 26667; // in ms
 
+        this.roundTimer = 5000; // in ms
+
         this.msgObj = new Message(this.timer);
+
+        this.roundObj = new Round(this.roundTimer);
 
         this.usedExpression = ["disappointed", "normal", "very_happy"];
 
@@ -92,6 +99,8 @@ class Live2DHandler extends React.Component {
 
         this.msgObj.CountDown(this.CountDownCallback);
 
+        this.roundObj.CountDown(this.roundEndsCallback);
+
         window.onbeforeunload = function () {
             return true;
         };
@@ -105,8 +114,41 @@ class Live2DHandler extends React.Component {
         console.log(this.usedExpression[this.state.selectedEmotionIndex]);
     }
 
+    roundEndsCallback = () => {
+        let nextRound = this.state.currentRound + 1;
+        
+        console.log("next round : " + nextRound);
+        // console.log(this.state.ukiyoeAllImageSets);
+        // console.log(this.state.ukiyoeAllImageSets[nextRound-1]);
+        // console.log(this.state.ukiyoeAllImageSets[nextRound-1][0]);
+        // this.setState((nextRound, nextImage) => ({
+        //     currentRound: nextRound,
+        //     ukiyoeName: nextImage,
+        // }));
+
+        console.log(nextRound);
+        if (nextRound < this.state.maxRound + 1)
+        {
+            this.props.onRoundEnd(this.state.maxRound-nextRound)
+            this.roundObj.CountDown(this.roundEndsCallback);
+
+            // let nextImage = this.state.ukiyoeAllImageSets[nextRound-1][0]
+
+            this.setState(() => ({
+                currentRound: nextRound
+            }));
+    
+        }
+        else{
+
+            this.props.onGameOver();
+        }
+        
+    }
+
     componentWillUnmount = () => {
         this.msgObj.ClearCountDown();
+        this.roundObj.ClearCountDown();
         window.onbeforeunload = null;
     }
 
@@ -179,11 +221,11 @@ class Live2DHandler extends React.Component {
         }
     }
 
-    /*updateImages = () => {
+    updateRandomImages = () => {
         this.setState(() => ({
             ukiyoeName: Math.floor(Math.random() * 20) + 1
         }));
-    }*/
+    }
 
     updateEmotion = (value) => {
         this.setState(() => ({
@@ -382,14 +424,14 @@ class Live2DHandler extends React.Component {
                             }}>
                             Submit 送信
                         </ColorButton>
-                        <SkipButton
+                        {/* <SkipButton
                             variant="outlined"
                             color="secondary"
                             onClick={() => {
                                 this.handleSkip()
                             }}>
                             Skip スキップ
-                        </SkipButton>
+                        </SkipButton> */}
                     </div>
                     <div>
                         <audio autoPlay loop id="bgm">

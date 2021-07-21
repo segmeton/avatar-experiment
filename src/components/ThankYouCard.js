@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
 //CHANGE THIS FOR VOTING
-const isVoting = true;
+const isVoting = false;
 
 const useStyles = makeStyles({
     root: {
