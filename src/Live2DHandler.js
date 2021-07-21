@@ -59,7 +59,7 @@ class Live2DHandler extends React.Component {
         let sets = this.getStaticSet();
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 20) + 1,
+            // ukiyoeName: Math.floor(Math.random() * 20) + 1,
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             ukiyoeName: sets[0][0],
             ukiyoeAllImageSets: sets,
@@ -73,13 +73,14 @@ class Live2DHandler extends React.Component {
             dbEnabled: false,
             descriptionsSkippedInARow: 0,
             currentRound: 1,
-            maxRound: 5
+            maxRound: 5,
+            errorMessage: null
         }
 
 
         this.timer = 26667; // in ms
 
-        this.roundTimer = 5000; // in ms
+        this.roundTimer = 80000; // in ms
 
         this.msgObj = new Message(this.timer);
 
@@ -274,14 +275,47 @@ class Live2DHandler extends React.Component {
     handleSubmit = () => {
         const numberOfReceivedDescriptions = this.state.numberOfReceivedDescriptions + 1;
         const receivedDescription = this.state.receivedDescription;
+        const ukiyoeNameSet = this.getUkiyoeSetName();
+
+        let regex = new RegExp('(.*):(.*)');
+        let result = regex.exec(receivedDescription);
+        
+        console.log(result);
+
+        if(result === null){
+            this.setState(() => ({
+                errorMessage: "Please use the correct format! 正しいフォーマットを使用してください！"
+            }));
+            return null;
+        }
+
+        let description = result[2]; 
+
+        regex = new RegExp('[ABC]');
+        let resultImgID = regex.exec(result[1]);
+
+        console.log(resultImgID);
+
+        if(resultImgID === null){
+            this.setState(() => ({
+                errorMessage: "Please use the correct imageID! 正しい画像IDを使用してください！"
+            }));
+            return null;
+        }
+        
+        let imgID = resultImgID[0] == "A" ? ukiyoeNameSet[0] : resultImgID[0] == "B" ? ukiyoeNameSet[1] : ukiyoeNameSet[2];
+
+        // console.log(imgID);
 
         //Add to database
         if(this.state.dbEnabled){
             db.ref(`descriptions`)
             .push({
-                description: receivedDescription,
+                // description: receivedDescription,
+                description: description,
                 participantID: this.props.participantID,
-                imageID: this.getUkiyoeName(),
+                // imageID: this.getUkiyoeName(),
+                imageID: imgID,
                 date: new Date().toLocaleString()
             }).then(_ => {
                 console.log("Added new description to DB")
@@ -289,7 +323,7 @@ class Live2DHandler extends React.Component {
         }
 
 
-        this.updateImages(true);
+        // this.updateImages(true);
 
         this.playSound();
 
@@ -299,7 +333,8 @@ class Live2DHandler extends React.Component {
             isSubmitButtonDisabled: true,
             receivedDescription: "",
             numberOfReceivedDescriptions: numberOfReceivedDescriptions,
-            descriptionsSkippedInARow: 0
+            descriptionsSkippedInARow: 0,
+            errorMessage: null
         }));
 
         this.props.onDescriptionSubmitted(this.state.ukiyoeAllImages.length)
@@ -402,22 +437,25 @@ class Live2DHandler extends React.Component {
                     <div className="column col-9">
                         <div className="row">
                             <div className="column col-4">
-                                <div className="row">
+                                <div className="row-flex-center">
                                     <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
                                         alt="ukiyoe art"/>
                                 </div>
+                                <div className="row-flex-center"><strong>A</strong></div>
                             </div>
                             <div className="column col-4">
-                                <div className="row">
+                                <div className="row-flex-center">
                                     <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[1]}.jpg`).default}
                                         alt="ukiyoe art"/>
                                 </div>
+                                <div className="row-flex-center"><strong>B</strong></div>
                             </div>
                             <div className="column col-4">
-                                <div className="row">
+                                <div className="row-flex-center">
                                     <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[2]}.jpg`).default}
                                         alt="ukiyoe art"/>
                                 </div>
+                                <div className="row-flex-center"><strong>C</strong></div>
                             </div>
                             {/* <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeName}.jpg`).default} alt="ukiyoe art"/>*/}
                         </div>
@@ -439,6 +477,15 @@ class Live2DHandler extends React.Component {
                                 label="Describe the image as concise as possible here (ここで画像をできるだけ簡潔に説明してください)"
                                 variant="outlined"
                                 onChange={this.handleDescriptionInput}/>
+                            <label>Please descibe them in format "<strong>imageID:description</strong>"</label>
+                            <label>For example, <strong>A:There is a group of kids playing on a beach</strong></label>
+                            <label>このフォーマットで説明してください。 "<strong>画像ID:説明</strong>"</label>
+                            <label>例, <strong>A:海で遊んでいる子供たちがいます。</strong></label>
+                        </div>
+                        <div className="row">
+                            { this.state.errorMessage && <div className="error"><strong>{ this.state.errorMessage }</strong></div>}
+                        </div>
+                        <div className="row">
                             <ColorButton
                                 disabled={this.state.isSubmitButtonDisabled}
                                 variant="contained"

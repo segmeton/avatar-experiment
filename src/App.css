@@ -81,15 +81,22 @@ footer{
 }
 
 .ukiyoe-responsive{
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;
+    /* margin-left: auto;
+    margin-right: auto; */
+    max-width: 98%;
     max-height: 400px;
     display: block;
-    margin-bottom: 20px;
-    margin-top: 20px;
+    /* margin-bottom: 20px;
+    margin-top: 20px; */
     width: auto;
     height: auto;
+}
+
+.row-flex-center{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
 }
 
 .ukiyoe-responsive-voting{
@@ -109,6 +116,18 @@ footer{
 #for_canvas {
     max-width: 70% !important;
     height: 200px;
+}
+
+.error{
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+    position: relative;
+    padding: 1rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    width: 100%;
 }
 
 /* .App {
