@@ -283,6 +283,7 @@ class Live2DHandler extends React.Component {
         console.log(result);
 
         if(result === null){
+            this.playSound("error-format");
             this.setState(() => ({
                 errorMessage: "Please use the correct format! 正しいフォーマットを使用してください！"
             }));
@@ -297,6 +298,7 @@ class Live2DHandler extends React.Component {
         console.log(resultImgID);
 
         if(resultImgID === null){
+            this.playSound("error-imgid");
             this.setState(() => ({
                 errorMessage: "Please use the correct imageID! 正しい画像IDを使用してください！"
             }));
@@ -325,7 +327,7 @@ class Live2DHandler extends React.Component {
 
         // this.updateImages(true);
 
-        this.playSound();
+        this.playSound("thanks");
 
         //window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
        
@@ -396,19 +398,19 @@ class Live2DHandler extends React.Component {
         
     }
 
-    playSound = () => {
-        let thanks = document.getElementById("thanks");
+    playSound = (elementID) => {
+        let audio = document.getElementById(elementID);
 
         // let g = Math.floor(Math.random() * 2);
         // console.log(g);
 
-        if(thanks !== undefined){
+        if(audio !== undefined){
             // if(g == 0){
             //     thanks.src = require(`./audio/thank_you_f.mp3`).default;
             // }else{
             //     thanks.src = require(`./audio/thank_you_m.mp3`).default;
             // }
-            thanks.play();
+            audio.play();
         }
 
     }
@@ -424,7 +426,9 @@ class Live2DHandler extends React.Component {
     render() {
         // const ukiyoeName = this.getUkiyoeName();
         const ukiyoeNameSet = this.getUkiyoeSetName();
-        const thanks = "thank_you_f"
+        const thanks = "thank_you_f";
+        const errorFormat = "error-format";
+        const errorImgID = "error-imgid";
 
         // let emotionsSelector = [];
         // for (let i = 0; i < listOfExpressions.length; i++) {
@@ -518,6 +522,14 @@ class Live2DHandler extends React.Component {
                     </audio>
                     <audio id="thanks">
                         <source src={require(`./audio/${thanks}.mp3`).default} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                    <audio id="error-format">
+                        <source src={require(`./audio/${errorFormat}.mp3`).default} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                    <audio id="error-imgid">
+                        <source src={require(`./audio/${errorImgID}.mp3`).default} type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>
                 </div>
