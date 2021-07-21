@@ -17,14 +17,6 @@ const ColorButton = withStyles(() => ({
         display: "block"
     },
 }))(Button);
-
-const SkipButton = withStyles(() => ({
-    root: {
-        margin: "10px",
-        display: "block"
-    },
-}))(Button);
-
 export const ColorInput = withStyles(() => ({
     root: {
         display: "block",
@@ -59,7 +51,7 @@ class Live2DHandler extends React.Component {
         let sets = this.getStaticSet();
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 20) + 1,
+            /*ukiyoeName: Math.floor(Math.random() * 20) + 1,*/
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             ukiyoeName: sets[0][0],
             ukiyoeAllImageSets: sets,
@@ -90,8 +82,6 @@ class Live2DHandler extends React.Component {
         // this.state.ukiyoeAllImages.splice(0, 1);
 
         this.handleSubmit = this.handleSubmit.bind(this);
-
-        
     }
 
     componentDidMount = () => {
@@ -252,8 +242,7 @@ class Live2DHandler extends React.Component {
     emotionsSelector;
 
     getUkiyoeSetName = () => {
-        let arr = this.state.ukiyoeAllImageSets[this.state.currentRound-1]
-        return arr;
+        return this.state.ukiyoeAllImageSets[this.state.currentRound - 1];
     }
 
     handleSkip() {
