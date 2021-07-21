@@ -22,7 +22,7 @@ import VotingHandler from "./VotingHandler";
 const currentDate = new Date().toLocaleDateString();
 
 //CHANGE THIS FOR VOTING
-const isVoting = false;
+const isVoting = true;
 
 // experiment time : description(5min=>5*60)    
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];

@@ -1,15 +1,28 @@
 import React from 'react';
-import {Button, CircularProgress, List, ListItem, ListItemText, Paper, TextField, withStyles} from "@material-ui/core";
+import {
+    Button,
+    FormControl, FormHelperText, InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    withStyles
+} from "@material-ui/core";
 import thank_you_f from "./audio/thank_you_f.mp3";
 import Message from "./utils/Message";
 import Round from "./utils/Round";
 import {db} from "./database/firebase";
 import * as PropTypes from "prop-types";
 import Alert from '@material-ui/lab/Alert';
+import {lightBlue} from "@material-ui/core/colors";
 
-const SkipButton = withStyles(() => ({
+const ColorButton = withStyles(() => ({
     root: {
-        marginTop: "10px",
+        color: "white",
+        backgroundColor: lightBlue[500],
+        '&:hover': {
+            backgroundColor: lightBlue[700],
+        },
+        margin: "10px",
         display: "block"
     },
 }))(Button);
@@ -53,7 +66,7 @@ class VotingHandler extends React.Component {
             // ukiyoeName: Math.floor(Math.random() * 20) + 1,
             ukiyoeName: sets[0][0],
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
-            ukiyoeAllImageSets: sets,
+            ukiyoeAllImageSets: this.getStaticSet(),
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -61,7 +74,9 @@ class VotingHandler extends React.Component {
             dbEnabled: true,
             loadedDescriptions: [],
             showLoadingIndicator: true,
-            descriptionsSkippedInARow: 0
+            descriptionsSkippedInARow: 0,
+            currentRound: 1,
+            selectedImage: 0
         }
 
         this.timer = 10000; // in ms
@@ -74,8 +89,7 @@ class VotingHandler extends React.Component {
 
         this.usedExpression = ["disappointed", "normal", "very_happy"];
 
-        this.state.ukiyoeAllImages.splice(0, 1);
-        this.loadDescriptionsForUkiyoe(1)
+        this.loadDescriptionsForUkiyoe(sets[0][0])
 
         this.handleSelectedDescription = this.handleSelectedDescription.bind(this);
     }
@@ -102,20 +116,12 @@ class VotingHandler extends React.Component {
 
     roundEndsCallback = () => {
         let nextRound = this.state.currentRound + 1;
-        
+
         console.log("next round : " + nextRound);
-        // console.log(this.state.ukiyoeAllImageSets);
-        // console.log(this.state.ukiyoeAllImageSets[nextRound-1]);
-        // console.log(this.state.ukiyoeAllImageSets[nextRound-1][0]);
-        // this.setState((nextRound, nextImage) => ({
-        //     currentRound: nextRound,
-        //     ukiyoeName: nextImage,
-        // }));
 
         console.log(nextRound);
-        if (nextRound < this.state.maxRound + 1)
-        {
-            this.props.onRoundEnd(this.state.maxRound-nextRound)
+        if (nextRound < this.state.maxRound + 1) {
+            this.props.onRoundEnd(this.state.maxRound - nextRound)
             this.roundObj.CountDown(this.roundEndsCallback);
 
             // let nextImage = this.state.ukiyoeAllImageSets[nextRound-1][0]
@@ -123,13 +129,11 @@ class VotingHandler extends React.Component {
             this.setState(() => ({
                 currentRound: nextRound
             }));
-    
-        }
-        else{
+
+        } else {
 
             this.props.onGameOver();
         }
-        
     }
 
     componentWillUnmount = () => {
@@ -142,9 +146,9 @@ class VotingHandler extends React.Component {
         let arr = [];
         let output = [];
         let chunkSize = 3;
-        while(arr.length < 15){
+        while (arr.length < 15) {
             var r = Math.floor(Math.random() * 20) + 1;
-            if(arr.indexOf(r) === -1) arr.push(r);
+            if (arr.indexOf(r) === -1) arr.push(r);
         }
 
         for (let i = 0; i < arr.length; i += chunkSize) {
@@ -164,9 +168,9 @@ class VotingHandler extends React.Component {
             [13, 15, 2]
         ];
 
-        for(let i = 0; i < arr.length; i++){
+        for (let i = 0; i < arr.length; i++) {
             arr[i] = this.shuffleArray(arr[i]);
-        } 
+        }
 
         arr = this.shuffleArray(arr);
 
@@ -182,36 +186,6 @@ class VotingHandler extends React.Component {
         return output;
     }
 
-    updateImages = (isSubmit) => {
-        const items = this.state.ukiyoeAllImages
-        console.log(items.length + " | " + items.toString())
-
-        if(isSubmit){
-            const index = items.indexOf(this.state.ukiyoeName);
-            items.splice(index, 1);
-
-            this.setState(() => ({
-                ukiyoeAllImages: items
-            }));
-        }
-
-        if(items.length > 0) {
-            const nextImage = items[Math.floor(Math.random() * items.length)]
-            this.setState(() => ({
-                ukiyoeName: nextImage
-            }));
-
-            console.log(items.length + " | " + items.toString())
-
-            this.loadDescriptionsForUkiyoe(nextImage)
-        } else {
-            //FINISH!
-            console.log("Finished")
-
-            this.props.onVotingFinished()
-        }
-    }
-
     updateEmotion = (value) => {
         this.setState(() => ({
             selectedEmotion: value
@@ -224,12 +198,10 @@ class VotingHandler extends React.Component {
         }
     }
 
-    getUkiyoeName = () => this.state.ukiyoeName
-    emotionsSelector;
+    getUkiyoeName = () => this.state.ukiyoeName;
 
     getUkiyoeSetName = () => {
-        let arr = this.state.ukiyoeAllImageSets[this.state.currentRound-1]
-        return arr;
+        return this.state.ukiyoeAllImageSets[this.state.currentRound - 1];
     }
 
     handleSelectedDescription = (index) => {
@@ -256,83 +228,37 @@ class VotingHandler extends React.Component {
                 });
         }
 
-        this.updateImages(true);
+        //this.updateImages(true);
 
-        this.props.onVoteSubmitted(this.state.ukiyoeAllImages.length)
+        //this.props.onVoteSubmitted(this.state.ukiyoeAllImages.length)
 
         this.updateExpressionState(true);
         this.playSound();
-    }
 
-    handleSkip() {
-        this.setState(() => ({
-            showLoadingIndicator: true,
-            descriptionsSkippedInARow: this.state.descriptionsSkippedInARow + 1
-        }));
-
-        this.updateImages(false);
-
-        console.log("Number of skips: " + this.state.descriptionsSkippedInARow)
-
-        if (this.state.descriptionsSkippedInARow >= 5) {
-            this.updateExpressionState(false);
-        }
-
-        /*this.setState(() => ({
-
-        }));*/
-
-        //this.props.onDescriptionSubmitted()
-
-        //this.updateExpressionState(true);
-
-        //this.msgObj.CountDown(this.CountDownCallback);
-        // for testing
-        //this.playSound();
-
-        // window.ChangeExpression(listOfExpressions[Math.floor(Math.random() * listOfExpressions.length)]);
+        this.updateImages(true);
     }
 
     updateExpressionState = (isUp) => {
         // 0 : negative
         // 1 : neutral
         // 2 : positive
-        // if(isUp){
-        //     let newIndex = this.state.selectedEmotionIndex + 1;
-        //     if(newIndex > 4){
-        //         newIndex = 4;
-        //     }
-        //     return this.updateSelectedEmotion(newIndex);
-        // }
-
-        // let newIndex = this.state.selectedEmotionIndex - 1;
-        // if(newIndex >= 0){
-        //     return this.updateSelectedEmotion(newIndex);
-        // }
-        // return null;
-
-        if(isUp){
+        if (isUp) {
             let newIndex = this.state.selectedEmotionIndex + 1;
-            if(newIndex > 2){
+            if (newIndex > 2) {
                 newIndex = 2;
             }
-            if(newIndex <= 2){
+            if (newIndex <= 2) {
                 return this.updateSelectedEmotion(newIndex);
             }
-            //roman code
-            // if(newIndex > 4){
-            //     newIndex = 4;
-            // }
-            // 
 
             return this.updateSelectedEmotion(newIndex);
         }
 
         let newIndex = this.state.selectedEmotionIndex - 1;
-        if(newIndex < 0){
+        if (newIndex < 0) {
             newIndex = 0;
         }
-        if(newIndex >= 0){
+        if (newIndex >= 0) {
             return this.updateSelectedEmotion(newIndex);
         }
         return null;
@@ -343,40 +269,64 @@ class VotingHandler extends React.Component {
         this.setState(() => ({
             selectedEmotionIndex: newIndex
         }));
-
-        // this.setState(() => ({
-        //     selectedEmotionIndex: newIndex
-        // }));
-        
-        // let newEmotion = 2;
-       
-        // if(newIndex === 2){
-        //     newEmotion = Math.floor(Math.random() * 2) + 3;
-        // }
-
-        // if(newIndex === 0){
-        //     newEmotion = Math.floor(Math.random() * 2);
-        // }
-
-        // this.updateEmotion(this.usedExpression[newEmotion]);
     }
 
     playSound = () => {
         let thanks = document.getElementById("thanks");
 
-        // let g = Math.floor(Math.random() * 2);
-        // console.log(g);
-
         if (thanks !== undefined) {
-            // if(g == 0){
-            //     thanks.src = require(`./audio/thank_you_f.mp3`).default;
-            // }else{
-            //     thanks.src = require(`./audio/thank_you_m.mp3`).default;
-            // }
             thanks.play();
         }
-
     }
+
+    handleDescriptionSelector = (event) => {
+        this.setState(() => ({
+            selectedDescription: event.target.value
+        }));
+    }
+
+    handleImageSelector = (event) => {
+        const selectedImage = event.target.value
+
+        this.setState(() => ({
+            selectedImage: selectedImage
+        }));
+
+        const receivedVal = this.getUkiyoeSetName()[selectedImage]
+        console.log(receivedVal)
+        this.loadDescriptionsForUkiyoe(receivedVal)
+
+
+        //for(let i = 0; i < this.getUkiyoeSetName().length; i += 1) {
+        console.log(this.getUkiyoeSetName())
+        //}
+    }
+
+    updateImages = (isSubmit) => {
+        const items = this.state.ukiyoeAllImages
+        console.log(items.length + " | " + items.toString())
+
+        if(isSubmit){
+            const index = items.indexOf(this.state.ukiyoeName);
+            items.splice(index, 1);
+            this.setState(() => ({
+                ukiyoeAllImages: items
+            }));
+        }
+
+        if(items.length > 0) {
+
+            const nextImage = items[Math.floor(Math.random() * items.length)]
+            this.setState(() => ({
+                ukiyoeName: nextImage
+            }));
+
+            console.log(items.length + " | " + items.toString())
+        } else {
+            this.props.onDescriptionsFinished()
+        }
+    }
+
 
     loadDescriptionsForUkiyoe = (imageID) => {
         let loadedDescriptionsFromFirebase = []
@@ -409,52 +359,81 @@ class VotingHandler extends React.Component {
     }
 
     render() {
-        // const ukiyoeName = this.getUkiyoeName();
         const ukiyoeNameSet = this.getUkiyoeSetName();
+        console.log("UKIYO-E SET: " + ukiyoeNameSet)
         const thanks = "thank_you_f"
-        const self = this
 
         return (
             <div className="content">
-                <div className="row-voting">
-                    <div className="column topPane">
-                        <img className="ukiyoe-responsive-voting"
-                            src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
-                            alt="ukiyoe art"/>
-                        <img className="ukiyoe-responsive-voting"
-                            src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
-                            alt="ukiyoe art"/>
-                        <img className="ukiyoe-responsive-voting"
-                            src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
-                            alt="ukiyoe art"/>
-                        <div>
-                            <h3>Select the best description for this image. (この画像に最も良い説明文を選択してください。)</h3>
-                            <span>Click on the description to vote. (説明文をクリックして投票してください。)</span>
-                            {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
-                                <Paper style={{maxHeight: 200, overflow: 'auto'}}>
-                                    <List component="nav" fullWidth>
-                                        {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
-                                            return <ListItem button onClick={() => {
-                                                self.handleSelectedDescription(i)
-                                            }}>
-                                                <ListItemText primary={object.description.toString()}/>
-                                            </ListItem>
-                                        }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
-                                            picture. Just press "Skip" to continue. (この写真の説明はありません。 「スキップ」を押すだけで続行できます。)</Alert>}
-                                    </List>
-                                </Paper>}
-                            {/* <SkipButton
-                                variant="outlined"
-                                color="secondary"
-                                onClick={() => {
-                                    this.handleSkip()
-                                }}>
-                                Skip スキップ
-                            </SkipButton> */}
+                <div className="row">
+                    <div className="column col-9">
+                        <div className="row">
+                            <div className="column col-4">
+                                <div className="row">
+                                    <img className="ukiyoe-responsive"
+                                         src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
+                                         alt="ukiyoe art"/>
+                                </div>
+                            </div>
+                            <div className="column col-4">
+                                <div className="row">
+                                    <img className="ukiyoe-responsive"
+                                         src={require(`./img/justin/${ukiyoeNameSet[1]}.jpg`).default}
+                                         alt="ukiyoe art"/>
+                                </div>
+                            </div>
+                            <div className="column col-4">
+                                <div className="row">
+                                    <img className="ukiyoe-responsive"
+                                         src={require(`./img/justin/${ukiyoeNameSet[2]}.jpg`).default}
+                                         alt="ukiyoe art"/>
+                                </div>
+                            </div>
                         </div>
-                        
+                        <div className="row">
+                            <FormControl style={{margin: '10px'}}>
+                                <InputLabel id="demo-simple-select-helper-label">Image</InputLabel>
+                                <Select
+                                    id="emotion-selector"
+                                    value={this.state.selectedImage}
+                                    onChange={this.handleImageSelector}
+                                    fullWidth
+                                >
+                                    <MenuItem value={0}>First</MenuItem>
+                                    <MenuItem value={1}>Second</MenuItem>
+                                    <MenuItem value={2}>Third</MenuItem>
+                                </Select>
+                                <FormHelperText>Select one of 3 images to see descriptions</FormHelperText>
+                            </FormControl>
+                            <FormControl style={{margin: '10px'}}>
+                                <InputLabel id="demo-simple-select-helper-label">Description</InputLabel>
+                                <Select
+                                    id="emotion-selector"
+                                    value={this.state.selectedDescription}
+                                    onChange={this.handleDescriptionSelector}
+                                    fullWidth
+                                >
+                                    {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
+                                        return <MenuItem value={i}>
+                                            {object.description.toString()}
+                                        </MenuItem>
+                                    }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
+                                        picture. Just press "Skip" to continue.</Alert>}
+                                </Select>
+                                <FormHelperText>Select your favorite description for a selected image</FormHelperText>
+                            </FormControl>
+                            <ColorButton
+                                disabled={this.state.isSubmitButtonDisabled}
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    this.handleSelectedDescription(this.state.selectedDescription)
+                                }}>
+                                Submit 送信
+                            </ColorButton>
+                        </div>
                     </div>
-                    <div className="column bottomPane">
+                    <div className="column col-3">
                         <div id="for_canvas">
                         </div>
                     </div>
