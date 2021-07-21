@@ -23,6 +23,7 @@ export class Message {
 
     ClearCountDown = () => {
         window.clearTimeout(this.timer);
+        this.isActive = false;
         this.timer = null;
     }
 }

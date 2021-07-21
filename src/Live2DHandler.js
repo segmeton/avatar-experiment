@@ -70,11 +70,12 @@ class Live2DHandler extends React.Component {
             receivedDescription: "",
             session: "describing", // describing || voting
             numberOfReceivedDescriptions: 0,
-            dbEnabled: false,
+            dbEnabled: true,
             descriptionsSkippedInARow: 0,
             currentRound: 1,
             maxRound: 5,
-            errorMessage: null
+            errorMessage: null,
+            imgDescribed: [false, false, false]
         }
 
 
@@ -136,8 +137,17 @@ class Live2DHandler extends React.Component {
             // let nextImage = this.state.ukiyoeAllImageSets[nextRound-1][0]
 
             this.setState(() => ({
-                currentRound: nextRound
+                currentRound: nextRound,
+                errorMessage: null,
+                imgDescribed: [false, false, false]
             }));
+
+            // 0 : negative
+            // 1 : neutral
+            // 2 : positive
+            this.updateSelectedEmotion(1);
+
+            this.msgObj.CountDown(this.CountDownCallback);
     
         }
         else{
@@ -277,6 +287,16 @@ class Live2DHandler extends React.Component {
         const receivedDescription = this.state.receivedDescription;
         const ukiyoeNameSet = this.getUkiyoeSetName();
 
+        let imgDescribed = this.state.imgDescribed;
+
+        if(JSON.stringify(imgDescribed)==JSON.stringify([true, true, true])){
+            this.playSound("error-wait");
+            this.setState(() => ({
+                errorMessage: "You have described every image. Please wait for the next set! すべての画像を説明しました。 次のセットをお待ちください！"
+            }));
+            return null;
+        }
+
         let regex = new RegExp('(.*):(.*)');
         let result = regex.exec(receivedDescription);
         
@@ -305,9 +325,42 @@ class Live2DHandler extends React.Component {
             return null;
         }
         
-        let imgID = resultImgID[0] == "A" ? ukiyoeNameSet[0] : resultImgID[0] == "B" ? ukiyoeNameSet[1] : ukiyoeNameSet[2];
+        let imgID = 0;
 
-        // console.log(imgID);
+        if(resultImgID[0] == "A"){
+            if(imgDescribed[0]){
+                this.playSound("error-multi");
+                this.setState(() => ({
+                    errorMessage: "You have described this image. Please describe the other image(s)! この画像を説明しました。 他の画像にを説明してください。"
+                }));
+                return null;
+            }
+            imgDescribed[0] = true;
+            imgID = ukiyoeNameSet[0];
+        }else if(resultImgID[0] == "B"){
+            if(imgDescribed[1]){
+                this.playSound("error-multi");
+                this.setState(() => ({
+                    errorMessage: "You have described this image. Please describe the other image(s)! この画像を説明しました。 他の画像にを説明してください。"
+                }));
+                return null;
+            }
+            imgDescribed[1] = true;
+            imgID = ukiyoeNameSet[1];
+        }else{
+            if(imgDescribed[2]){
+                this.playSound("error-multi");
+                this.setState(() => ({
+                    errorMessage: "You have described this image. Please describe the other image(s)! この画像を説明しました。 他の画像にを説明してください。"
+                }));
+                return null;
+            }
+            imgDescribed[2] = true;
+            imgID = ukiyoeNameSet[2];
+        }
+
+        console.log(imgID);
+        console.log(imgDescribed);
 
         //Add to database
         if(this.state.dbEnabled){
@@ -324,7 +377,6 @@ class Live2DHandler extends React.Component {
             });
         }
 
-
         // this.updateImages(true);
 
         this.playSound("thanks");
@@ -336,14 +388,21 @@ class Live2DHandler extends React.Component {
             receivedDescription: "",
             numberOfReceivedDescriptions: numberOfReceivedDescriptions,
             descriptionsSkippedInARow: 0,
-            errorMessage: null
+            errorMessage: null,
+            imgDescribed: imgDescribed
         }));
 
         this.props.onDescriptionSubmitted(this.state.ukiyoeAllImages.length)
 
         this.updateExpressionState(true);
 
-        this.msgObj.CountDown(this.CountDownCallback);
+        if(JSON.stringify(imgDescribed)==JSON.stringify([true, true, true])){
+            this.msgObj.ClearCountDown();
+        }
+        else{
+            this.msgObj.CountDown(this.CountDownCallback);
+        }
+        
     }
 
     updateExpressionState = (isUp) => {
@@ -429,6 +488,8 @@ class Live2DHandler extends React.Component {
         const thanks = "thank_you_f";
         const errorFormat = "error-format";
         const errorImgID = "error-imgid";
+        const errorMulti = "error-multi";
+        const errorWait = "error-wait";
 
         // let emotionsSelector = [];
         // for (let i = 0; i < listOfExpressions.length; i++) {
@@ -530,6 +591,14 @@ class Live2DHandler extends React.Component {
                     </audio>
                     <audio id="error-imgid">
                         <source src={require(`./audio/${errorImgID}.mp3`).default} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                    <audio id="error-multi">
+                        <source src={require(`./audio/${errorMulti}.mp3`).default} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                    <audio id="error-wait">
+                        <source src={require(`./audio/${errorWait}.mp3`).default} type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>
                 </div>

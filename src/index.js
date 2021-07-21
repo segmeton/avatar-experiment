@@ -53,7 +53,7 @@ class MainWindow extends React.Component {
             totalNumberOfSkippedVotes: 0,
             language: "English", // English || 日本語
             isAgreeToConsent: false,
-            dbEnabled: false,
+            dbEnabled: true,
             selectedGroup: "group_emotions",
             password: "",
             session: "Describing",
@@ -66,7 +66,7 @@ class MainWindow extends React.Component {
         // this.countDown = countDown.bind(this);
 
         this.changeState = this.changeState.bind(this);
-        //this.checkIfUsernameUnique = this.checkIfUsernameUnique.bind(this);
+        this.checkIfUsernameUnique = this.checkIfUsernameUnique.bind(this);
 
     }
 
@@ -286,11 +286,11 @@ class MainWindow extends React.Component {
 
     onGameOver = () => {
         console.log("game over");
-        // if (isVoting === true) {
-        //     this.showEndingAlertVoting()
-        // } else {
-        //     this.showEndingAlertDescription()
-        // }
+        if (isVoting === true) {
+            this.showEndingAlertVoting()
+        } else {
+            this.showEndingAlertDescription()
+        }
     }
 
     startTimer = () => {
