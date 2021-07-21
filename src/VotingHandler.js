@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, CircularProgress, List, ListItem, ListItemText, Paper, TextField, withStyles} from "@material-ui/core";
 import thank_you_f from "./audio/thank_you_f.mp3";
 import Message from "./utils/Message";
+import Round from "./utils/Round";
 import {db} from "./database/firebase";
 import * as PropTypes from "prop-types";
 import Alert from '@material-ui/lab/Alert';
@@ -49,7 +50,8 @@ class VotingHandler extends React.Component {
         let sets = this.getStaticSet();
 
         this.state = {
-            ukiyoeName: Math.floor(Math.random() * 20) + 1,
+            // ukiyoeName: Math.floor(Math.random() * 20) + 1,
+            ukiyoeName: sets[0][0],
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
             ukiyoeAllImageSets: sets,
             play: false,
@@ -64,7 +66,11 @@ class VotingHandler extends React.Component {
 
         this.timer = 10000; // in ms
 
+        this.roundTimer = 30000; // in ms
+
         this.msgObj = new Message(this.timer);
+
+        this.roundObj = new Round(this.roundTimer);
 
         this.usedExpression = ["disappointed", "normal", "very_happy"];
 
@@ -79,6 +85,8 @@ class VotingHandler extends React.Component {
 
         this.msgObj.CountDown(this.CountDownCallback);
 
+        this.roundObj.CountDown(this.roundEndsCallback);
+
         window.onbeforeunload = function () {
             return true;
         };
@@ -92,8 +100,41 @@ class VotingHandler extends React.Component {
         console.log(this.usedExpression[this.state.selectedEmotionIndex]);
     }
 
+    roundEndsCallback = () => {
+        let nextRound = this.state.currentRound + 1;
+        
+        console.log("next round : " + nextRound);
+        // console.log(this.state.ukiyoeAllImageSets);
+        // console.log(this.state.ukiyoeAllImageSets[nextRound-1]);
+        // console.log(this.state.ukiyoeAllImageSets[nextRound-1][0]);
+        // this.setState((nextRound, nextImage) => ({
+        //     currentRound: nextRound,
+        //     ukiyoeName: nextImage,
+        // }));
+
+        console.log(nextRound);
+        if (nextRound < this.state.maxRound + 1)
+        {
+            this.props.onRoundEnd(this.state.maxRound-nextRound)
+            this.roundObj.CountDown(this.roundEndsCallback);
+
+            // let nextImage = this.state.ukiyoeAllImageSets[nextRound-1][0]
+
+            this.setState(() => ({
+                currentRound: nextRound
+            }));
+    
+        }
+        else{
+
+            this.props.onGameOver();
+        }
+        
+    }
+
     componentWillUnmount = () => {
         this.msgObj.ClearCountDown();
+        this.roundObj.ClearCountDown();
         window.onbeforeunload = null;
     }
 
@@ -185,6 +226,11 @@ class VotingHandler extends React.Component {
 
     getUkiyoeName = () => this.state.ukiyoeName
     emotionsSelector;
+
+    getUkiyoeSetName = () => {
+        let arr = this.state.ukiyoeAllImageSets[this.state.currentRound-1]
+        return arr;
+    }
 
     handleSelectedDescription = (index) => {
         this.setState(() => ({
@@ -363,57 +409,66 @@ class VotingHandler extends React.Component {
     }
 
     render() {
-        const ukiyoeName = this.getUkiyoeName();
+        // const ukiyoeName = this.getUkiyoeName();
+        const ukiyoeNameSet = this.getUkiyoeSetName();
         const thanks = "thank_you_f"
         const self = this
 
         return (
-            <div className="row-voting">
-                <div className="column topPane">
-                    <img className="ukiyoe-responsive-voting"
-                         src={require(`./img/justin/${ukiyoeName}.jpg`).default}
-                         alt="ukiyoe art"/>
-                    <div>
-                        <h3>Select the best description for this image. (この画像に最も良い説明文を選択してください。)</h3>
-                        <span>Click on the description to vote. (説明文をクリックして投票してください。)</span>
-                        {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
-                            <Paper style={{maxHeight: 200, overflow: 'auto'}}>
-                                <List component="nav" fullWidth>
-                                    {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
-                                        return <ListItem button onClick={() => {
-                                            self.handleSelectedDescription(i)
-                                        }}>
-                                            <ListItemText primary={object.description.toString()}/>
-                                        </ListItem>
-                                    }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
-                                        picture. Just press "Skip" to continue. (この写真の説明はありません。 「スキップ」を押すだけで続行できます。)</Alert>}
-                                </List>
-                            </Paper>}
-                        <SkipButton
-                            variant="outlined"
-                            color="secondary"
-                            onClick={() => {
-                                this.handleSkip()
-                            }}>
-                            Skip スキップ
-                        </SkipButton>
+            <div className="content">
+                <div className="row-voting">
+                    <div className="column topPane">
+                        <img className="ukiyoe-responsive-voting"
+                            src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
+                            alt="ukiyoe art"/>
+                        <img className="ukiyoe-responsive-voting"
+                            src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
+                            alt="ukiyoe art"/>
+                        <img className="ukiyoe-responsive-voting"
+                            src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
+                            alt="ukiyoe art"/>
+                        <div>
+                            <h3>Select the best description for this image. (この画像に最も良い説明文を選択してください。)</h3>
+                            <span>Click on the description to vote. (説明文をクリックして投票してください。)</span>
+                            {this.state.showLoadingIndicator ? <CircularProgress color="secondary"/> :
+                                <Paper style={{maxHeight: 200, overflow: 'auto'}}>
+                                    <List component="nav" fullWidth>
+                                        {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
+                                            return <ListItem button onClick={() => {
+                                                self.handleSelectedDescription(i)
+                                            }}>
+                                                <ListItemText primary={object.description.toString()}/>
+                                            </ListItem>
+                                        }) : <Alert style={{maxWidth: '100%'}} severity="info">No descriptions for this
+                                            picture. Just press "Skip" to continue. (この写真の説明はありません。 「スキップ」を押すだけで続行できます。)</Alert>}
+                                    </List>
+                                </Paper>}
+                            {/* <SkipButton
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => {
+                                    this.handleSkip()
+                                }}>
+                                Skip スキップ
+                            </SkipButton> */}
+                        </div>
+                        
                     </div>
-                    <div>
-                        <audio autoPlay loop id="bgm">
-                            <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default}
-                                    type="audio/mpeg"/>
-                            Your browser does not support the audio element.
-                        </audio>
-                        <audio id="thanks">
-                            <source src={require(`./audio/${thanks}.mp3`).default} type="audio/mpeg"/>
-                            Your browser does not support the audio element.
-                        </audio>
+                    <div className="column bottomPane">
+                        <div id="for_canvas">
+                        </div>
                     </div>
                 </div>
-
-                <div className="column bottomPane">
-                    <div id="for_canvas">
-                    </div>
+                <div>
+                    <audio autoPlay loop id="bgm">
+                        <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default}
+                                type="audio/mpeg"/>
+                        Your browser does not support the audio element.
+                    </audio>
+                    <audio id="thanks">
+                        <source src={require(`./audio/${thanks}.mp3`).default} type="audio/mpeg"/>
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
             </div>
         );
