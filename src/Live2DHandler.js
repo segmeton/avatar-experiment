@@ -251,6 +251,11 @@ class Live2DHandler extends React.Component {
     getUkiyoeName = () => this.state.ukiyoeName
     emotionsSelector;
 
+    getUkiyoeSetName = () => {
+        let arr = this.state.ukiyoeAllImageSets[this.state.currentRound-1]
+        return arr;
+    }
+
     handleSkip() {
         this.updateImages(false);
         this.props.onSkipButtonClicked()
@@ -382,7 +387,8 @@ class Live2DHandler extends React.Component {
     }
 
     render() {
-        const ukiyoeName = this.getUkiyoeName();
+        // const ukiyoeName = this.getUkiyoeName();
+        const ukiyoeNameSet = this.getUkiyoeSetName();
         const thanks = "thank_you_f"
 
         // let emotionsSelector = [];
@@ -391,64 +397,82 @@ class Live2DHandler extends React.Component {
         // }
 
         return (
-            <div className="row">
-                <div className="column col-6">
-                    <div className="row">
-                        <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeName}.jpg`).default}
-                             alt="ukiyoe art"/>
+            <div className="content">
+                <div className="row">
+                    <div className="column col-9">
+                        <div className="row">
+                            <div className="column col-4">
+                                <div className="row">
+                                    <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
+                                        alt="ukiyoe art"/>
+                                </div>
+                            </div>
+                            <div className="column col-4">
+                                <div className="row">
+                                    <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[1]}.jpg`).default}
+                                        alt="ukiyoe art"/>
+                                </div>
+                            </div>
+                            <div className="column col-4">
+                                <div className="row">
+                                    <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[2]}.jpg`).default}
+                                        alt="ukiyoe art"/>
+                                </div>
+                            </div>
+                            {/* <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeName}.jpg`).default} alt="ukiyoe art"/>*/}
+                        </div>
+                        <div className="row">
+                            {/* {<Select
+                                id="emotion-selector"
+                                value={this.state.selectedEmotion}
+                                onChange={this.handleEmotionSelector}
+                                displayEmpty
+                                fullWidth
+                            >
+                                {emotionsSelector}
+                            </Select>} */}
+                            <ColorInput
+                                onKeyDown={this.keyPress}
+                                value={this.state.receivedDescription}
+                                fullWidth
+                                id="outlined-basic"
+                                label="Describe the image as concise as possible here (ここで画像をできるだけ簡潔に説明してください)"
+                                variant="outlined"
+                                onChange={this.handleDescriptionInput}/>
+                            <ColorButton
+                                disabled={this.state.isSubmitButtonDisabled}
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    this.handleSubmit()
+                                }}>
+                                Submit 送信
+                            </ColorButton>
+                            {/* <SkipButton
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => {
+                                    this.handleSkip()
+                                }}>
+                                Skip スキップ
+                            </SkipButton> */}
+                        </div>
                     </div>
-                    <div className="row">
-                        {/* {<Select
-                            id="emotion-selector"
-                            value={this.state.selectedEmotion}
-                            onChange={this.handleEmotionSelector}
-                            displayEmpty
-                            fullWidth
-                        >
-                            {emotionsSelector}
-                        </Select>} */}
-                        <ColorInput
-                            onKeyDown={this.keyPress}
-                            value={this.state.receivedDescription}
-                            fullWidth
-                            id="outlined-basic"
-                            label="Describe the image as concise as possible here (ここで画像をできるだけ簡潔に説明してください)"
-                            variant="outlined"
-                            onChange={this.handleDescriptionInput}/>
-                        <ColorButton
-                            disabled={this.state.isSubmitButtonDisabled}
-                            variant="contained"
-                            color="primary"
-                            onClick={() => {
-                                this.handleSubmit()
-                            }}>
-                            Submit 送信
-                        </ColorButton>
-                        {/* <SkipButton
-                            variant="outlined"
-                            color="secondary"
-                            onClick={() => {
-                                this.handleSkip()
-                            }}>
-                            Skip スキップ
-                        </SkipButton> */}
-                    </div>
-                    <div>
-                        <audio autoPlay loop id="bgm">
-                        {/* <audio loop id="bgm"> */}
-                            <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default} type="audio/mpeg" />
-                            Your browser does not support the audio element.
-                        </audio>
-                        <audio id="thanks">
-                            <source src={require(`./audio/${thanks}.mp3`).default} type="audio/mpeg" />
-                            Your browser does not support the audio element.
-                        </audio>
+                    <div className="column col-3">
+                        <div id="for_canvas">
+                        </div>
                     </div>
                 </div>
-
-                <div className="column col-6">
-                    <div id="for_canvas">
-                    </div>
+                <div>
+                    <audio autoPlay loop id="bgm">
+                    {/* <audio loop id="bgm"> */}
+                        <source src={require(`./audio/sukiyaki_instrumental_${this.state.session}.mp3`).default} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                    <audio id="thanks">
+                        <source src={require(`./audio/${thanks}.mp3`).default} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
             </div>
         );

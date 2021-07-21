@@ -286,11 +286,11 @@ class MainWindow extends React.Component {
 
     onGameOver = () => {
         console.log("game over");
-        if (isVoting === true) {
-            this.showEndingAlertVoting()
-        } else {
-            this.showEndingAlertDescription()
-        }
+        // if (isVoting === true) {
+        //     this.showEndingAlertVoting()
+        // } else {
+        //     this.showEndingAlertDescription()
+        // }
     }
 
     startTimer = () => {
