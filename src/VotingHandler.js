@@ -76,6 +76,7 @@ class VotingHandler extends React.Component {
             showLoadingIndicator: true,
             descriptionsSkippedInARow: 0,
             currentRound: 1,
+            maxRound: 5,
             selectedImage: 0
         }
 
