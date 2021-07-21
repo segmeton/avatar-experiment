@@ -45,9 +45,13 @@ class VotingHandler extends React.Component {
     constructor(props) {
         super(props);
 
+        // let sets = this.generateSets();
+        let sets = this.getStaticSet();
+
         this.state = {
             ukiyoeName: Math.floor(Math.random() * 20) + 1,
             ukiyoeAllImages: Array.from({length: 20}, (_, i) => i + 1),
+            ukiyoeAllImageSets: sets,
             play: false,
             selectedEmotion: "normal",
             selectedEmotionIndex: 1,
@@ -91,6 +95,50 @@ class VotingHandler extends React.Component {
     componentWillUnmount = () => {
         this.msgObj.ClearCountDown();
         window.onbeforeunload = null;
+    }
+
+    generateSets = () => {
+        let arr = [];
+        let output = [];
+        let chunkSize = 3;
+        while(arr.length < 15){
+            var r = Math.floor(Math.random() * 20) + 1;
+            if(arr.indexOf(r) === -1) arr.push(r);
+        }
+
+        for (let i = 0; i < arr.length; i += chunkSize) {
+            var chunk = arr.slice(i, i + chunkSize);
+            output.push(chunk);
+        }
+
+        return output;
+    }
+
+    getStaticSet = () => {
+        let arr = [
+            [17, 20, 1],
+            [7, 14, 10],
+            [19, 9, 18],
+            [4, 16, 2],
+            [13, 15, 2]
+        ];
+
+        for(let i = 0; i < arr.length; i++){
+            arr[i] = this.shuffleArray(arr[i]);
+        } 
+
+        arr = this.shuffleArray(arr);
+
+        return arr;
+    }
+
+    shuffleArray = (array) => {
+        let output = array;
+        for (let i = output.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [output[i], output[j]] = [output[j], output[i]];
+        }
+        return output;
     }
 
     updateImages = (isSubmit) => {
