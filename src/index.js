@@ -22,7 +22,7 @@ import VotingHandler from "./VotingHandler";
 const currentDate = new Date().toLocaleDateString();
 
 //CHANGE THIS FOR VOTING
-const isVoting = true;
+const isVoting = false;
 
 // experiment time : description(5min=>5*60)    
 const gameStages = ["consent", "welcome", "description", "results", "welcome_voting", "voting"];
@@ -53,24 +53,26 @@ class MainWindow extends React.Component {
             totalNumberOfSkippedVotes: 0,
             language: "English", // English || 日本語
             isAgreeToConsent: false,
-            dbEnabled: true,
+            dbEnabled: false,
             selectedGroup: "group_emotions",
             password: "",
             session: "Describing",
-            imageLeft: 40
+            imageLeft: 20,
+            roundLeft: 4
         };
 
-        this.timer = 0;
-        this.startTimer = this.startTimer.bind(this);
-        this.countDown = countDown.bind(this);
+        // this.timer = 0;
+        // this.startTimer = this.startTimer.bind(this);
+        // this.countDown = countDown.bind(this);
 
         this.changeState = this.changeState.bind(this);
-        this.checkIfUsernameUnique = this.checkIfUsernameUnique.bind(this);
+        //this.checkIfUsernameUnique = this.checkIfUsernameUnique.bind(this);
+
     }
 
     componentDidMount() {
-        let timeLeftVar = secondsToTime(this.state.seconds);
-        this.setState({time: timeLeftVar});
+        // let timeLeftVar = secondsToTime(this.state.seconds);
+        // this.setState({time: timeLeftVar});
     }
 
     triggerEndingAlert = () => {
@@ -204,14 +206,19 @@ class MainWindow extends React.Component {
 
     checkIfUsernameUnique = (username) => {
         const self = this
-        db.ref('participants/').orderByChild('participantName').equalTo(username).on("value", function (snapshot) {
+        if(this.state.dbEnabled){
+            db.ref('participants/').orderByChild('participantName').equalTo(username).on("value", function (snapshot) {
 
-            if (snapshot.numChildren() > 0) {
-                self.child.openUsedUsernameDialog()
-            } else {
-                self.prepareForDescriptionRound(username)
-            }
-        })
+                if (snapshot.numChildren() > 0) {
+                    self.child.openUsedUsernameDialog()
+                } else {
+                    self.prepareForDescriptionRound(username)
+                }
+            })
+        }
+        else{
+            self.prepareForDescriptionRound(username)
+        }
     }
 
     prepareForDescriptionRound = (participantName) => {
@@ -269,6 +276,21 @@ class MainWindow extends React.Component {
             totalNumberOfVotes: this.state.totalNumberOfVotes + 1,
             imageLeft: imageLeft
         })
+    }
+
+    onRoundEnd = (round) => {
+        this.setState({
+            roundLeft: round
+        })
+    }
+
+    onGameOver = () => {
+        console.log("game over");
+        if (isVoting === true) {
+            this.showEndingAlertVoting()
+        } else {
+            this.showEndingAlertDescription()
+        }
     }
 
     startTimer = () => {
@@ -332,16 +354,17 @@ class MainWindow extends React.Component {
                 </footer>
             </React.StrictMode>)
         } else if (this.state.stage === gameStages[2]) { //DESCRIPTION STAGE
-            this.startTimer()
+            // this.startTimer()
 
-            let stringTime = this.getStringTime(this.state.time);
+            // let stringTime = this.getStringTime(this.state.time);
 
             return (
                 <React.StrictMode>
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Describing session (記述セッション): {stringTime} - {this.state.imageLeft} images left (残り{this.state.imageLeft}イメージ)</h1>}
+                            {/* {<h1 className="title">Describing session (記述セッション): {stringTime} - {this.state.imageLeft} images left (残り{this.state.imageLeft}イメージ)</h1>} */}
+                            {<h1 className="title">Describing session (記述セッション): {this.state.roundLeft} sets left (残り{this.state.roundLeft}セット)</h1>}
                         </div>
                     </header>
                     {/*style={{ overflowY: 'scroll', height: 'calc(100vh - 127px)' }}*/}
@@ -352,6 +375,8 @@ class MainWindow extends React.Component {
                             onSkipButtonClicked={this.onSkipButtonClicked}
                             onDescriptionSubmitted={this.onDescriptionSubmitted}
                             onDescriptionsFinished={this.triggerEndingAlert}
+                            onRoundEnd={this.onRoundEnd}
+                            onGameOver={this.onGameOver}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
@@ -382,16 +407,17 @@ class MainWindow extends React.Component {
                 </footer>
             </React.StrictMode>)
         } else if (this.state.stage === gameStages[5]) { //VOTING STAGE
-            this.startTimer()
+            // this.startTimer()
 
-            let stringTime = this.getStringTime(this.state.time);
+            // let stringTime = this.getStringTime(this.state.time);
 
             return (
                 <React.StrictMode>
                     <Doc/>
                     <header className="header">
                         <div className="header-container">
-                            {<h1 className="title">Voting session (投票セッション): {stringTime} - {this.state.imageLeft} images left (残り{this.state.imageLeft}イメージ)</h1>}
+                            {/* {<h1 className="title">Voting session (投票セッション): {stringTime} - {this.state.imageLeft} images left (残り{this.state.imageLeft}イメージ)</h1>} */}
+                            {<h1 className="title">Voting session (投票セッション): {this.state.roundLeft} sets left (残り{this.state.roundLeft}セット)</h1>}
                         </div>
                     </header>
                     <main className="container">
@@ -400,6 +426,8 @@ class MainWindow extends React.Component {
                             participantID={this.state.participantID}
                             onVoteSubmitted={this.onVoteSubmitted}
                             onVotingFinished={this.triggerEndingAlert}
+                            onRoundEnd={this.onRoundEnd}
+                            onGameOver={this.onGameOver}
                         />
                         <EndingAlertDialog onRef={ref => (this.child = ref)}/>
                     </main>
