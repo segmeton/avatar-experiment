@@ -334,18 +334,23 @@ class VotingHandler extends React.Component {
 
         if (this.state.dbEnabled) {
             const self = this;
+            const pID = this.props.participantID
             db.ref('descriptions/').orderByChild('imageID').equalTo(imageID).on("value", function (snapshot) {
                 snapshot.forEach(function (data) {
-                    loadedDescriptionsFromFirebase.push(
-                        {
-                            "key": data.key,
-                            "description": data.val().description,
-                            "numberOfVotes": data.val().numberOfVotes
-                        }
-                    )
+                    if(pID != data.val().participantID){
+                        loadedDescriptionsFromFirebase.push(
+                            {
+                                "key": data.key,
+                                "description": data.val().description,
+                                "numberOfVotes": data.val().numberOfVotes
+                            }
+                        )
+                    }
                 });
 
                 console.log("Descriptions for image " + imageID + ": ")
+
+                loadedDescriptionsFromFirebase = self.shuffleArray(loadedDescriptionsFromFirebase);
 
                 loadedDescriptionsFromFirebase.forEach(desc => {
                     console.log(desc.key + " | " + desc.description)
