@@ -99,6 +99,9 @@ class Live2DHandler extends React.Component {
     }
 
     CountDownCallback = () => {
+        if(JSON.stringify(this.state.imgDescribed)==JSON.stringify([true, true, true])){
+            return null;
+        }
         this.updateExpressionState(false);
         if(this.state.selectedEmotionIndex > 0){
             this.msgObj.CountDown(this.CountDownCallback);
@@ -176,7 +179,7 @@ class Live2DHandler extends React.Component {
             [7, 14, 10],
             [19, 9, 18],
             [4, 16, 2],
-            [13, 15, 2]
+            [13, 15, 5]
         ];
 
         for(let i = 0; i < arr.length; i++){
@@ -387,6 +390,7 @@ class Live2DHandler extends React.Component {
 
         if(JSON.stringify(imgDescribed)==JSON.stringify([true, true, true])){
             this.msgObj.ClearCountDown();
+            console.log("clear coundt down");
         }
         else{
             this.msgObj.CountDown(this.CountDownCallback);

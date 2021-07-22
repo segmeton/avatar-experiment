@@ -1,4 +1,9 @@
 export class Message {
+    
+    timer = null;
+    duration = 0;
+    isActive = false;
+    
     constructor(duration){
         this.duration = duration;
         this.isActive = false;
@@ -22,7 +27,7 @@ export class Message {
     }
 
     ClearCountDown = () => {
-        window.clearTimeout(this.timer);
+        clearTimeout(this.timer);
         this.isActive = false;
         this.timer = null;
     }
