@@ -178,7 +178,7 @@ class VotingHandler extends React.Component {
             [7, 14, 10],
             [19, 9, 18],
             [4, 16, 2],
-            [13, 15, 2]
+            [13, 15, 5]
         ];
 
         for (let i = 0; i < arr.length; i++) {
