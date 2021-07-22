@@ -187,9 +187,14 @@ class MainWindow extends React.Component {
                     receivedParticipantID = data.val().participantID
                     receivedParticipantName = data.val().participantName
 
+                    let receivedParticipantGroup = data.val().selectedGroup
+
+                    console.log("Selected group: " + receivedParticipantGroup)
+
                     self.setState({
                         participantName: receivedParticipantName,
-                        participantID: receivedParticipantID
+                        participantID: receivedParticipantID,
+                        selectedGroup: receivedParticipantGroup
                     });
                 });
 
