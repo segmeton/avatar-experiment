@@ -22,7 +22,7 @@ export class Round {
     }
 
     ClearCountDown = () => {
-        window.clearTimeout(this.timer);
+        clearTimeout(this.timer);
         this.isActive = false;
         this.timer = null;
     }
