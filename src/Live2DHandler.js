@@ -535,10 +535,12 @@ class Live2DHandler extends React.Component {
                                 label="Describe the image as concise as possible here (ここで画像をできるだけ簡潔に説明してください)"
                                 variant="outlined"
                                 onChange={this.handleDescriptionInput}/>
-                            <label>Please descibe them in format "<strong>imageID:description</strong>"</label>
-                            <label>For example, <strong>A:There is a group of kids playing on a beach</strong></label>
-                            <label>このフォーマットで説明してください。 "<strong>画像ID:説明</strong>"</label>
-                            <label>例, <strong>A:海で遊んでいる子供たちがいます。</strong></label>
+                            <label>
+                                Please describe these images in format <strong>"imageID:description"</strong>. For example, <strong>“A:There is a group of kids playing on a beach.”</strong>.  If possible, do this for <strong>all</strong> the images, but you can describe <strong>each</strong> image only <strong>once</strong>.
+                            </label>
+                            <label>
+                                それらの画像を<strong>「imageID:description」</strong>の形式で記述してください。たとえば、<strong>「A:ビーチで遊んでいる子供たちのグループがいます。」（注意："imageID:"は半角）</strong>。可能であれば<strong>すべて</strong>の画像に対して実施してください。ただし、<strong>各</strong>画像は<strong>一度</strong>だけ記述できます。
+                            </label>
                         </div>
                         <div className="row">
                             { this.state.errorMessage && <div className="error"><strong>{ this.state.errorMessage }</strong></div>}

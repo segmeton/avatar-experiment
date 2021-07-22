@@ -428,6 +428,12 @@ class VotingHandler extends React.Component {
                                 </Select>
                                 <FormHelperText>Select your favorite description for a selected image</FormHelperText>
                             </FormControl>
+                            <label>
+                                <strong>Only one vote is required.</strong> Please vote by first selecting one of the three images to see its descriptions and then select your favorite description for the selected image. 
+                            </label>
+                            <label>
+                                <strong>投票は1回だけです。</strong>最初に3つの画像のいずれかを選択して説明文を表示し、次に選択した画像のお気に入りの説明文を選択して投票してください。
+                            </label>
                             <ColorButton
                                 disabled={this.state.isSubmitButtonDisabled}
                                 variant="contained"
