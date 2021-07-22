@@ -7,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import Live2DHandler from "./Live2DHandler";
-import {countDown, secondsToTime} from "./utils/Counter";
+import {secondsToTime} from "./utils/Counter";
 import WelcomeCard from "./components/WelcomeCard";
 import './App.css';
 import EndingAlertDialog from "./components/EndingAlertDialog";
@@ -315,14 +315,14 @@ class MainWindow extends React.Component {
 
     CurrentStagePage = () => {
         if (this.state.stage === gameStages[0]) { //CONSENT STAGE
-            return (<React.StrictMode>
+            return (<React.StrictMode style={{overflowY: "scroll", flex: 1}}>
                 <Doc/>
                 <header className="header">
                     <div className="header-container">
                         <h1 className="title">Important　重要</h1>
                     </div>
                 </header>
-                <main className="container">
+                <main className="container" >
                     <ConsentCard onChildClick={this.consentAccept.bind(this)}/>
                 </main>
                 <footer>

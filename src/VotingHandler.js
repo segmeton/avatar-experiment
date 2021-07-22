@@ -3,7 +3,7 @@ import {
     Button,
     FormControl, FormHelperText, InputLabel,
     MenuItem,
-    Select,
+    Select, Snackbar,
     TextField,
     withStyles
 } from "@material-ui/core";
@@ -77,7 +77,10 @@ class VotingHandler extends React.Component {
             descriptionsSkippedInARow: 0,
             currentRound: 1,
             maxRound: 5,
-            selectedImage: 0
+            selectedImage: 0,
+            isSnackOpened: false,
+            isSubmitButtonDisabled: false,
+            shouldChangeEmotionWithTime: true
         }
 
         this.timer = 10000; // in ms
@@ -90,7 +93,7 @@ class VotingHandler extends React.Component {
 
         this.usedExpression = ["disappointed", "normal", "very_happy"];
 
-        this.loadDescriptionsForUkiyoe(sets[0][0])
+        this.loadDescriptionsForUkiyoe(this.getUkiyoeSetName()[0])
 
         this.handleSelectedDescription = this.handleSelectedDescription.bind(this);
     }
@@ -108,7 +111,9 @@ class VotingHandler extends React.Component {
     }
 
     CountDownCallback = () => {
-        this.updateExpressionState(false);
+        if (this.state.shouldChangeEmotionWithTime === true) {
+            this.updateExpressionState(false);
+        }
         if (this.state.selectedEmotionIndex > 0) {
             this.msgObj.CountDown(this.CountDownCallback);
         }
@@ -135,6 +140,14 @@ class VotingHandler extends React.Component {
 
             this.props.onGameOver();
         }
+
+        this.setState(() => ({
+            isSubmitButtonDisabled: false,
+            selectedImage: 0,
+            shouldChangeEmotionWithTime: true
+        }));
+
+        this.loadDescriptionsForUkiyoe(this.getUkiyoeSetName()[0])
     }
 
     componentWillUnmount = () => {
@@ -206,37 +219,44 @@ class VotingHandler extends React.Component {
     }
 
     handleSelectedDescription = (index) => {
-        this.setState(() => ({
-            showLoadingIndicator: true,
-            descriptionsSkippedInARow: 0
-        }));
+        if (index == null) {
+            this.openErrorSnackbar()
+        } else {
+            this.setState(() => ({
+                showLoadingIndicator: true,
+                descriptionsSkippedInARow: 0
+            }));
 
-        const result = this.state.loadedDescriptions[index]
+            const result = this.state.loadedDescriptions[index]
 
-        if (result.numberOfVotes == null) {
-            result['numberOfVotes'] = 0
+            if (result.numberOfVotes == null) {
+                result['numberOfVotes'] = 0
+            }
+
+            console.log("Selected description: " + result.key + " | " + result.description + " | " + result.numberOfVotes)
+
+            if (this.state.dbEnabled) {
+                db.ref(`descriptions/${result.key}`)
+                    .update({
+                        numberOfVotes: result.numberOfVotes + 1
+                    })
+                    .then(() => {
+                        console.log("Updated information about number of votes for description " + result.key)
+                    });
+            }
+
+            this.updateExpressionState(true);
+            this.playSound();
+
+            //this.updateImages(true);
+
+            this.openSnackbar();
+
+            this.setState(() => ({
+                isSubmitButtonDisabled: true,
+                shouldChangeEmotionWithTime: false
+            }));
         }
-
-        console.log("Selected description: " + result.key + " | " + result.description + " | " + result.numberOfVotes)
-
-        if (this.state.dbEnabled) {
-            db.ref(`descriptions/${result.key}`)
-                .update({
-                    numberOfVotes: result.numberOfVotes + 1
-                })
-                .then(() => {
-                    console.log("Updated information about number of votes for description " + result.key)
-                });
-        }
-
-        //this.updateImages(true);
-
-        //this.props.onVoteSubmitted(this.state.ukiyoeAllImages.length)
-
-        this.updateExpressionState(true);
-        this.playSound();
-
-        this.updateImages(true);
     }
 
     updateExpressionState = (isUp) => {
@@ -328,6 +348,30 @@ class VotingHandler extends React.Component {
         }
     }
 
+    handleSnackbarClose = () => {
+        this.setState(() => ({
+            isSnackOpened: false
+        }));
+    }
+
+    openSnackbar = () => {
+        this.setState(() => ({
+            isSnackOpened: true
+        }));
+    }
+
+    handleErrorSnackbarClose = () => {
+        this.setState(() => ({
+            showErrorSnackbar: false
+        }));
+    }
+
+    openErrorSnackbar = () => {
+        this.setState(() => ({
+            showErrorSnackbar: true
+        }));
+    }
+
 
     loadDescriptionsForUkiyoe = (imageID) => {
         let loadedDescriptionsFromFirebase = []
@@ -371,6 +415,17 @@ class VotingHandler extends React.Component {
 
         return (
             <div className="content">
+                <Snackbar open={this.state.isSnackOpened} autoHideDuration={2000} onClose={this.handleSnackbarClose}>
+                    <Alert onClose={this.handleSnackbarClose} severity="success">
+                        Saved!
+                    </Alert>
+                </Snackbar>
+                <Snackbar open={this.state.showErrorSnackbar} autoHideDuration={2000}
+                          onClose={this.handleErrorSnackbarClose}>
+                    <Alert onClose={this.handleErrorSnackbarClose} severity="warning">
+                        Please, select a description!
+                    </Alert>
+                </Snackbar>
                 <div className="row">
                     <div className="column col-9">
                         <div className="row">
@@ -403,8 +458,7 @@ class VotingHandler extends React.Component {
                                     id="emotion-selector"
                                     value={this.state.selectedImage}
                                     onChange={this.handleImageSelector}
-                                    fullWidth
-                                >
+                                    fullWidth>
                                     <MenuItem value={0}>A</MenuItem>
                                     <MenuItem value={1}>B</MenuItem>
                                     <MenuItem value={2}>C</MenuItem>
@@ -417,8 +471,7 @@ class VotingHandler extends React.Component {
                                     id="emotion-selector"
                                     value={this.state.selectedDescription}
                                     onChange={this.handleDescriptionSelector}
-                                    fullWidth
-                                >
+                                    fullWidth>
                                     {this.state.loadedDescriptions.length > 0 ? this.state.loadedDescriptions.map(function (object, i) {
                                         return <MenuItem value={i}>
                                             {object.description.toString()}
