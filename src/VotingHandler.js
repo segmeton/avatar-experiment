@@ -370,25 +370,25 @@ class VotingHandler extends React.Component {
                     <div className="column col-9">
                         <div className="row">
                             <div className="column col-4">
-                                <div className="row">
-                                    <img className="ukiyoe-responsive"
-                                         src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
+                                <div className="row-flex-center">
+                                    <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[0]}.jpg`).default}
                                          alt="ukiyoe art"/>
                                 </div>
+                                <div className="row-flex-center"><strong>A</strong></div>
                             </div>
                             <div className="column col-4">
-                                <div className="row">
-                                    <img className="ukiyoe-responsive"
-                                         src={require(`./img/justin/${ukiyoeNameSet[1]}.jpg`).default}
+                                <div className="row-flex-center">
+                                    <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[1]}.jpg`).default}
                                          alt="ukiyoe art"/>
                                 </div>
+                                <div className="row-flex-center"><strong>B</strong></div>
                             </div>
                             <div className="column col-4">
-                                <div className="row">
-                                    <img className="ukiyoe-responsive"
-                                         src={require(`./img/justin/${ukiyoeNameSet[2]}.jpg`).default}
+                                <div className="row-flex-center">
+                                    <img className="ukiyoe-responsive" src={require(`./img/justin/${ukiyoeNameSet[2]}.jpg`).default}
                                          alt="ukiyoe art"/>
                                 </div>
+                                <div className="row-flex-center"><strong>C</strong></div>
                             </div>
                         </div>
                         <div className="row">
@@ -400,9 +400,9 @@ class VotingHandler extends React.Component {
                                     onChange={this.handleImageSelector}
                                     fullWidth
                                 >
-                                    <MenuItem value={0}>First</MenuItem>
-                                    <MenuItem value={1}>Second</MenuItem>
-                                    <MenuItem value={2}>Third</MenuItem>
+                                    <MenuItem value={0}>A</MenuItem>
+                                    <MenuItem value={1}>B</MenuItem>
+                                    <MenuItem value={2}>C</MenuItem>
                                 </Select>
                                 <FormHelperText>Select one of 3 images to see descriptions</FormHelperText>
                             </FormControl>
